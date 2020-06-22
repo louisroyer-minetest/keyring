@@ -1,0 +1,18 @@
+# textdomain: keyring
+
+
+### craft.lua ###
+
+Key found in keyring and selected (@1).=
+Key not found in keyring.=
+Keyring=
+
+### formspec.lua ###
+
+Exit=
+List of keys in the keyring=
+Remove key=
+Rename key=
+There is no room in your inventory for a key.=
+You must enter a name first.=
+You must select a key first.=

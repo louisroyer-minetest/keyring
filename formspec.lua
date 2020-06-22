@@ -38,6 +38,8 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 				.." sent a keyring action but has not the right keyring in hand.")
 			return
 		end
+
+		-- key selection
 		if fields.selected_key ~= nil then
 			local event = minetest.explode_textlist_event(fields.selected_key)
 			if event.type ~= "INV" then
@@ -49,14 +51,16 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 				selected[name] = event.index
 			end
 		end
+
 		if selected[name] then
-			-- add user description
+			-- no name provided for renaming
 			if (fields.rename or (fields.key_enter and fields.key_enter_field
 				and fields.key_enter_field == "new_name"))
 				and ((not fields.new_name) or fields.new_name == "") then
 				minetest.chat_send_player(name, S("You must enter a name first."))
 				return
 			end
+			-- add user description
 			if (fields.rename or (fields.key_enter and fields.key_enter_field
 				and fields.key_enter_field == "new_name"))
 				and key_list[name] and selected[name] and selected[name] <= #key_list[name]
@@ -68,13 +72,41 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 				keyring.formspec(item, minetest.get_player_by_name(name))
 				return
 			end
+			-- put the key out of keyring
 			if fields.remove and selected[name] and key_list[name] and selected[name]
 				and selected[name] <= #key_list[name] then
-				-- TODO
-				minetest.chat_send_player(name, "Not implemented")
+				local key = ItemStack("default:key")
+				local u_krs = minetest.deserialize(krs)
+				local key_meta = key:get_meta()
+				key_meta:set_string("secret", selected[name])
+				key_meta:set_string(keyring.fields.description,
+					u_krs[key_list[name][selected[name]]].user_description)
+				key_meta:set_string("description",
+					u_krs[key_list[name][selected[name]]].description)
+				local inv = minetest.get_player_by_name(name):get_inventory()
+				if inv:room_for_item("main", key) then
+					-- remove key from keyring
+					local number = u_krs[key_list[name][selected[name]]].number
+					if number > 1 then
+						-- remove only 1 key
+						u_krs[key_list[name][selected[name]]].number = number -1
+					else
+						u_krs[key_list[name][selected[name]]] = nil
+					end
+					-- apply
+					item:get_meta():set_string(keyring.fields.KRS, minetest.serialize(u_krs))
+					player:set_wielded_item(item)
+					keyring.formspec(item, minetest.get_player_by_name(name))
+
+					-- add key to inventory
+					inv:add_item("main", key)
+				else
+					minetest.chat_send_player(name, S("There is no room in your inventory for a key."))
+				end
 				return
 			end
 		end
+		-- no selected key, but removing/renaming asked
 		if (fields.rename or fields.remove or (fields.key_enter and fields.key_enter_field
 			and fields.key_enter_field == "new_name")) and not selected[name] then
 			minetest.chat_send_player(name, S("You must select a key first."))

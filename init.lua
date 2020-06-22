@@ -3,7 +3,7 @@ local MP = minetest.get_modpath("keyring")
 keyring = {}
 
 -- mod information
-keyring.mod = {version = "0.1.1", author = "Louis Royer"}
+keyring.mod = {version = "0.1.2", author = "Louis Royer"}
 
 keyring.log = function(s)
 	minetest.log("[keyring] "..s)

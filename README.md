@@ -6,9 +6,7 @@ Keyrings can be used to store keys with right click.
 Once keys are stored in the keyring, they can be used as a regular keys.
 
 ## Missing features
-- [ ] Removing keys from keyring
 - [ ] Keyring texture (current is placeholder)
-- [ ] Translation files
 - [ ] Tests on a multiplayer server
 - [ ] Screenshot
 - [ ] Set version to 1.0 in init.lua
