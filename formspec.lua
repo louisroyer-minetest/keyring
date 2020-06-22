@@ -16,12 +16,14 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		local name = player:get_player_name()
 		local item = player:get_wielded_item()
 		if item:get_name() ~= "keyring:keyring" then
-			keyring.log("Player "..name.." sent a keyring action but has no keyring in hand.")
+			keyring.log("Player "..name..
+				" sent a keyring action but has no keyring in hand.")
 			return
 		end
 		local krs = item:get_meta():get_string(keyring.fields.KRS)
 		if krs ~= context[name] then
-			keyring.log("Player "..name.." sent a keyring action but has not the right keyring in hand.")
+			keyring.log("Player "..name
+				.." sent a keyring action but has not the right keyring in hand.")
 			return
 		end
 	end

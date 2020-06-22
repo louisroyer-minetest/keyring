@@ -14,7 +14,8 @@ local function select_key(itemstack, placer, meta)
 		-- nothing to do, abort to avoid spamming the chat
 		return itemstack
 	end
-	if secret ~= "" and keyring.fields.utils.KRS.in_serialized_keyring(itemstack, secret) then
+	if secret ~= "" and keyring.fields.utils.KRS.in_serialized_keyring(
+		itemstack, secret) then
 		minetest.chat_send_player(name, S("Key found in keyring and selected (@1)."),
 			minetest.deserialize(i_meta:get_string(keyring.fields.KRS))[secret].description)
 		i_meta:set_string("secret", secret)
