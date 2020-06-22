@@ -1,9 +1,9 @@
 keyring.fields = {utils = {}}
 --[[ Meta field KRS `_keyring_registered_secret` contains
 --{
---  { <secret1>, {number: <number>, description: <description>} }
---  { <secret2>, {number: <number>, description: <description>} }
---  { <secret3>, {number: <number>, description: <description>} }
+--  { <secret1>, {number: <number>, description: <description>, user_description: <user_description>} }
+--  { <secret2>, {number: <number>, description: <description>, user_description: <user_description>} }
+--  { <secret3>, {number: <number>, description: <description>, user_description: <user_description>} }
 --  …
 --}
 --
@@ -28,3 +28,5 @@ keyring.fields.utils.KRS.in_serialized_keyring  = function(itemstack, secret)
 	local krs = minetest.deserialize(itemstack:get_meta():get_string(keyring.fields.KRS)) or {}
 	return in_keyring(krs, secret)
 end
+
+keyring.fields.description = "_keyring_user_description"

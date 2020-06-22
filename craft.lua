@@ -127,17 +127,21 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 							secrets[k].number = secrets[k].number + v.number
 						end
 					end
-				else
+				elseif item:get_name() ~= "keyring:keyring" then
 					-- else extract secret
 					local secret = item:get_meta():get_string("secret")
 					if not keyring.fields.utils.KRS.in_keyring(secrets, secret) then
-						secrets[secret] = {number = 1, description = item:get_description()}
+						local u_desc = item:get_meta():get_string(keyring.fields.description)
+						secrets[secret] = {
+							number = 1,
+							description = item:get_description(),
+							user_description = (u_desc ~= "") and u_desc or nil
+						}
 					else
 						secrets[secret].number = secrets[secret].number + 1
 					end
 				end
 			end
-
 		end
 		-- write secrets in keyring.fields.KRS
 		itemstack:get_meta():set_string(keyring.fields.KRS, minetest.serialize(secrets))
