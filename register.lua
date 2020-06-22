@@ -146,7 +146,7 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 				local krs = item:get_meta():get_string(KRS)
 				if krs ~= "" then
 					-- extract KRS if it exists
-					for k, v in pairs(minetest.deserialize(krs)) do
+					for k, v in pairs(minetest.deserialize(krs) or {}) do
 						-- add missing secrets
 						if not in_keyring(secrets, k) then
 							secrets[k] = v
