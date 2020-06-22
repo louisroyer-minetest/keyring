@@ -2,7 +2,7 @@
 **This is still a Work In Progress**
 
 This minetest mod adds keyrings.
-Keyrings can be used to store keys with right click.
+Keyrings can be used to store keys.
 Once keys are stored in the keyring, they can be used as a regular keys.
 
 ## Missing features
