@@ -9,14 +9,13 @@ local KRS = "_keyring_registered_secrets"
 --  { <secret2>, {number: <number>, description: <description>} }
 --  { <secret3>, {number: <number>, description: <description>} }
 --  …
---}  
+--}
 --
 --]]
 
 --[[ Returns true if secret is in the secrets_list.
 --]]
 local function in_keyring(secrets_list, secret)
-	local stop = false
 	for k, _ in pairs(secrets_list) do
 		if secret == k then
 			return true
@@ -56,7 +55,9 @@ local function select_key(itemstack, placer, meta)
 	local secret = meta:get_string("key_lock_secret")
 	if secret == i_meta:get_string("secret") or owner == name or owner == "" then
 		-- nothing to do, abort to avoid spamming the chat
-	elseif secret ~= "" and in_serialized_keyring(itemstack, secret) then
+		return itemstack
+	end
+	if secret ~= "" and in_serialized_keyring(itemstack, secret) then
 		minetest.chat_send_player(name, S("Key found in keyring and selected (@1)."),
 			minetest.deserialize(i_meta:get_string(KRS))[secret].description)
 		i_meta:set_string("secret", secret)

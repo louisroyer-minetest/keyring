@@ -1,5 +1,6 @@
-# minetest-keyring [![Build Status](https://travis-ci.org/louisroyer/minetest-keyring.svg?branch=master)](https://travis-ci.org/louisroyer/minetest-keyring) 
-*This is still a Work In Progress*
+# minetest-keyring [![Build Status](https://travis-ci.org/louisroyer/minetest-keyring.svg?branch=master)](https://travis-ci.org/louisroyer/minetest-keyring)
+**This is still a Work In Progress**
+
 This minetest mod adds keyrings.
 Keyrings can be used to store keys with right click.
 Once keys are stored in the keyring, it can be used as a regular key.
@@ -7,6 +8,7 @@ Once keys are stored in the keyring, it can be used as a regular key.
 ## Missing features
 - [ ] Removing keys from keyring
 - [ ] Keyring texture (current is placeholder)
+- [ ] Translation files
 - [ ] Tests on a multiplayer server
 - [ ] Screenshot
 - [ ] Set version to 1.0 in init.lua
