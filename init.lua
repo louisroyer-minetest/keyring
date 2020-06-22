@@ -5,9 +5,6 @@ keyring = {}
 -- mod information
 keyring.mod = {version = "0.1.0", author = "Louis Royer"}
 
-keyring.log = function(s)
-	minetest.log("[keyring] "..s)
-end
-
-
-dofile(MP.."/register.lua")
+dofile(MP.."/meta_fields.lua")
+dofile(MP.."/formspec.lua")
+dofile(MP.."/craft.lua")
