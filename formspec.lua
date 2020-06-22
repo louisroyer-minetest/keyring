@@ -4,16 +4,28 @@ local F = minetest.formspec_escape
 
 -- context
 local context = {}
+local selected = {}
+local key_list = {}
 minetest.register_on_leaveplayer(function(player)
 	local name = player:get_player_name()
 	context[name] = nil
+	selected[name] = nil
+	key_list[name] = nil
 end)
 
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
-	if formname == "action:keyring:edit" then
-		-- check abuses
+	if formname == "keyring:edit" then
 		local name = player:get_player_name()
+		-- clean context
+		if fields.quit and not fields.key_enter then
+			context[name] = nil
+			selected[name] = nil
+			key_list[name] = nil
+			return
+		end
+
+		-- check abuses
 		local item = player:get_wielded_item()
 		if item:get_name() ~= "keyring:keyring" then
 			keyring.log("Player "..name..
@@ -26,18 +38,65 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 				.." sent a keyring action but has not the right keyring in hand.")
 			return
 		end
+		if fields.selected_key ~= nil then
+			local event = minetest.explode_textlist_event(fields.selected_key)
+			if event.type ~= "INV" then
+				if key_list[name] == nil or event.index > #key_list[name] then
+					keyring.log("Player "..name
+						.." selected a key in keyring interface but this key does not exist.")
+					return
+				end
+				selected[name] = event.index
+			end
+		end
+		if selected[name] then
+			-- add user description
+			if (fields.rename or (fields.key_enter and fields.key_enter_field
+				and fields.key_enter_field == "new_name"))
+				and ((not fields.new_name) or fields.new_name == "") then
+				minetest.chat_send_player(name, S("You must enter a name first."))
+				return
+			end
+			if (fields.rename or (fields.key_enter and fields.key_enter_field
+				and fields.key_enter_field == "new_name"))
+				and key_list[name] and selected[name] and selected[name] <= #key_list[name]
+				and fields.new_name and fields.new_name ~= "" and selected[name] then
+				local u_krs = minetest.deserialize(krs)
+				u_krs[key_list[name][selected[name]]].user_description = fields.new_name
+				item:get_meta():set_string(keyring.fields.KRS, minetest.serialize(u_krs))
+				player:set_wielded_item(item)
+				keyring.formspec(item, minetest.get_player_by_name(name))
+				return
+			end
+			if fields.remove and selected[name] and key_list[name] and selected[name]
+				and selected[name] <= #key_list[name] then
+				-- TODO
+				minetest.chat_send_player(name, "Not implemented")
+				return
+			end
+		end
+		if (fields.rename or fields.remove or (fields.key_enter and fields.key_enter_field
+			and fields.key_enter_field == "new_name")) and not selected[name] then
+			minetest.chat_send_player(name, S("You must select a key first."))
+			return
+		end
+
 	end
 end)
 
 --[[ Get key list
--- parameter: serialized krs
+-- parameter: serialized krs and player name
 -- return: key list
 --]]
-function get_keylist(serialized_krs)
+function get_key_list(serialized_krs, name)
 	local krs = minetest.deserialize(serialized_krs or {})
 	local list = ""
 	local first = true
-	for _, v in pairs(krs) do
+	local index = 1
+	key_list[name] = {}
+	for k, v in pairs(krs) do
+		key_list[name][index] = k
+		index = index +1
 		if not first then
 			list = list..","
 		else
@@ -45,7 +104,7 @@ function get_keylist(serialized_krs)
 		end
 		list = list..F(v.user_description or v.description)
 		if (v.number > 1) then
-			list = list..F("(×"..v.number..")")
+			list = list..F(" (×"..v.number..")")
 		end
 	end
 	return list
@@ -56,23 +115,20 @@ end
 -- player: the player to show formspec
 --]]
 keyring.formspec = function(itemstack, player)
-	-- TODO: allow to change a name, and to retrieve a key into the main inventory
 	local name = player:get_player_name()
 	local krs = itemstack:get_meta():get_string(keyring.fields.KRS)
 	local formspec = "formspec_version[3]"
 		.."size[10.75,11.25]"
 		.."label[1,1;"..F(S("List of keys in the keyring")).."]"
-		.."textlist[1,1.75;8.75,7;test;"..get_keylist(krs).."]"
+		.."textlist[1,1.75;8.75,7;selected_key;"..get_key_list(krs, name).."]"
 		.."button[1,9;5,1;rename;"..F(S("Rename key")).."]"
-		.."label[1,9;NOT IMPLEMENTED]"
 		.."field[6.5,9;3.25,1;new_name;;]"
-		.."label[6.5,9;NOT IMPLEMENTED]"
+		.."field_close_on_enter[new_name;false]"
 		.."button[1,10;5,1;remove;"..F(S("Remove key")).."]"
-		.."label[1,10;NOT IMPLEMENTED]"
 		.."button_exit[6.5,10;3.25,1;exit;"..F(S("Exit")).."]"
 
 	-- context
 	context[name] = krs
-	minetest.show_formspec(name, "keyring:show", formspec)
+	minetest.show_formspec(name, "keyring:edit", formspec)
 	return itemstack
 end
