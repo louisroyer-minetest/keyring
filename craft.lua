@@ -14,7 +14,7 @@ local function select_key(itemstack, placer, meta)
 		-- nothing to do, abort to avoid spamming the chat
 		return itemstack
 	end
-	if secret ~= "" and keyring.fields.util.KRS.in_serialized_keyring(itemstack, secret) then
+	if secret ~= "" and keyring.fields.utils.KRS.in_serialized_keyring(itemstack, secret) then
 		minetest.chat_send_player(name, S("Key found in keyring and selected (@1)."),
 			minetest.deserialize(i_meta:get_string(keyring.fields.KRS))[secret].description)
 		i_meta:set_string("secret", secret)
@@ -83,6 +83,22 @@ for _, wire in pairs(wires) do
 			{ wire, "basic_materials:empty_spool" }
 		},
 	})
+	-- craft with 4 group:key
+	-- to make the adding of keys in keyring easier (but at a cost)
+	minetest.register_craft({
+		output = "keyring:keyring",
+		recipe = {
+			{ "group:key", wire, "group:key" },
+			{ wire,        "",          wire },
+			{ "group:key", wire, "group:key" },
+		},
+		replacements = {
+			{ wire, "basic_materials:empty_spool" },
+			{ wire, "basic_materials:empty_spool" },
+			{ wire, "basic_materials:empty_spool" },
+			{ wire, "basic_materials:empty_spool" }
+		},
+	})
 end
 
 -- craft to add a key
@@ -105,7 +121,7 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 					-- extract keyring.fields.KRS if it exists
 					for k, v in pairs(minetest.deserialize(krs) or {}) do
 						-- add missing secrets
-						if not keyring.fields.util.KRS.in_keyring(secrets, k) then
+						if not keyring.fields.utils.KRS.in_keyring(secrets, k) then
 							secrets[k] = v
 						else
 							secrets[k].number = secrets[k].number + v.number
@@ -114,7 +130,7 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 				else
 					-- else extract secret
 					local secret = item:get_meta():get_string("secret")
-					if not keyring.fields.util.KRS.in_keyring(secrets, secret) then
+					if not keyring.fields.utils.KRS.in_keyring(secrets, secret) then
 						secrets[secret] = {number = 1, description = item:get_description()}
 					else
 						secrets[secret].number = secrets[secret].number + 1

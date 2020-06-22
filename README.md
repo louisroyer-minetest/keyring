@@ -24,7 +24,15 @@ wire   key   wire
 empty  wire  empty
 ```
 
+or
+```text
+group:key wire   group:key
+wire      empty  wire
+group:key wire   group:key
+```
+
 This gives back 4 `basic_materials:empty_spool`.
+In both crafts, items keys (or `group:key`) items will be added to the resulting keyring.
 
 ### Add a key to the keyring (shapeless)
 - `group:key` (`default:key` or `keyring:keyring`)
