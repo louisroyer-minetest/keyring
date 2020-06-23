@@ -121,7 +121,7 @@ end)
 -- return: key list
 --]]
 function get_key_list(serialized_krs, name)
-	local krs = minetest.deserialize(serialized_krs or {})
+	local krs = minetest.deserialize(serialized_krs) or {}
 	local list = ""
 	local first = true
 	local index = 1
