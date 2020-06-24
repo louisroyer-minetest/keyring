@@ -18,7 +18,7 @@ local function select_key(itemstack, placer, meta)
 		itemstack, secret) then
 		local u_desc = minetest.deserialize(i_meta:get_string(keyring.fields.KRS))[secret].user_description
 		minetest.chat_send_player(name, S("Key found in keyring and selected (@1).",
-			u_desc ~= nil and u_desc ~= "" and u_desc or
+			(u_desc ~= nil and u_desc ~= "") and u_desc or
 			minetest.deserialize(i_meta:get_string(keyring.fields.KRS))[secret].description))
 		i_meta:set_string("secret", secret)
 	else
