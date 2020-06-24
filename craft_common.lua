@@ -21,7 +21,8 @@ keyring.craft_common.select_key = function(itemstack, placer, meta)
 		return itemstack
 	end
 	if not keyring_access then
-		keyring.log(name.." try to use personnal keyring of "..(keyring_owner or "unkwown player"))
+		keyring.log(name.." try to use personnal keyring of "
+			..(keyring_owner or "unkwown player"))
 		-- resetting immediatly the secret to avoid unallowed uses
 		i_meta:set_string("secret", "")
 		if placer:get_wielded_item():get_meta():get_string(
@@ -73,7 +74,8 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 		for position, item in pairs(old_craft_grid) do
 			local keyring_owner = item:get_meta():get_string("owner")
 			local keyring_allowed = (keyring_owner == nil)
-				or (keyring_owner == name) or (keyring_owner == "")
+				or (keyring_owner == player:get_player_name())
+				or (keyring_owner == "")
 			-- check item is of group key
 			local groups = item:get_definition().groups
 			if keyring_allowed and groups and groups.key == 1 then

@@ -159,7 +159,8 @@ end
 keyring.formspec = function(itemstack, player)
 	local keyring_owner = itemstack:get_meta():get_string("owner")
 	local keyring_allowed = (keyring_owner == nil)
-		or (keyring_owner == name) or (keyring_owner == "")
+		or (keyring_owner == player:get_player_name())
+		or (keyring_owner == "")
 	if not keyring_allowed then
 		keyring.log(player:get_player_name()
 			.." tryed to access key management of a keyring owned by "
