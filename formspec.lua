@@ -39,6 +39,16 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			return
 		end
 
+		local keyring_owner = item:get_meta():get_string("owner")
+		local keyring_allowed = (keyring_owner == nil)
+			or (keyring_owner == name) or (keyring_owner == "")
+		if not keyring_allowed then
+			keyring.log(player:get_player_name()
+				.." sent command to manage keys of a keyring owned by "
+				..(keyring_owner or "unknown player"))
+			return
+		end
+
 		-- key selection
 		if fields.selected_key ~= nil then
 			local event = minetest.explode_textlist_event(fields.selected_key)
@@ -147,6 +157,15 @@ end
 -- player: the player to show formspec
 --]]
 keyring.formspec = function(itemstack, player)
+	local keyring_owner = itemstack:get_meta():get_string("owner")
+	local keyring_allowed = (keyring_owner == nil)
+		or (keyring_owner == name) or (keyring_owner == "")
+	if not keyring_allowed then
+		keyring.log(player:get_player_name()
+			.." tryed to access key management of a keyring owned by "
+			..(keyring_owner or "unknown player"))
+		return itemstack
+	end
 	local name = player:get_player_name()
 	local krs = itemstack:get_meta():get_string(keyring.fields.KRS)
 	local formspec = "formspec_version[3]"
