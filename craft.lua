@@ -21,6 +21,10 @@ local function select_key(itemstack, placer, meta)
 			(u_desc ~= nil and u_desc ~= "") and u_desc or
 			minetest.deserialize(i_meta:get_string(keyring.fields.KRS))[secret].description))
 		i_meta:set_string("secret", secret)
+		-- update immediatly wielded item
+		if placer:get_wielded_item():get_meta():get_string(keyring.fields.KRS) == i_meta:get_string(keyring.fields.KRS) then
+			placer:set_wielded_item(itemstack)
+		end
 	else
 		minetest.chat_send_player(name, S("Key not found in keyring."))
 	end
