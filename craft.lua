@@ -16,13 +16,15 @@ local function select_key(itemstack, placer, meta)
 	end
 	if secret ~= "" and keyring.fields.utils.KRS.in_serialized_keyring(
 		itemstack, secret) then
-		local u_desc = minetest.deserialize(i_meta:get_string(keyring.fields.KRS))[secret].user_description
+		local u_desc = minetest.deserialize(
+			i_meta:get_string(keyring.fields.KRS))[secret].user_description
 		minetest.chat_send_player(name, S("Key found in keyring and selected (@1).",
 			(u_desc ~= nil and u_desc ~= "") and u_desc or
 			minetest.deserialize(i_meta:get_string(keyring.fields.KRS))[secret].description))
 		i_meta:set_string("secret", secret)
 		-- update immediatly wielded item
-		if placer:get_wielded_item():get_meta():get_string(keyring.fields.KRS) == i_meta:get_string(keyring.fields.KRS) then
+		if placer:get_wielded_item():get_meta():get_string(
+			keyring.fields.KRS) == i_meta:get_string(keyring.fields.KRS) then
 			placer:set_wielded_item(itemstack)
 		end
 	else
