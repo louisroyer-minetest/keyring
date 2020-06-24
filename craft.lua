@@ -16,8 +16,10 @@ local function select_key(itemstack, placer, meta)
 	end
 	if secret ~= "" and keyring.fields.utils.KRS.in_serialized_keyring(
 		itemstack, secret) then
-		minetest.chat_send_player(name, S("Key found in keyring and selected (@1)."),
-			minetest.deserialize(i_meta:get_string(keyring.fields.KRS))[secret].description)
+		local u_desc = minetest.deserialize(i_meta:get_string(keyring.fields.KRS))[secret].user_description
+		minetest.chat_send_player(name, S("Key found in keyring and selected (@1).",
+			u_desc ~= nil and u_desc ~= "" and u_desc or
+			minetest.deserialize(i_meta:get_string(keyring.fields.KRS))[secret].description))
 		i_meta:set_string("secret", secret)
 	else
 		minetest.chat_send_player(name, S("Key not found in keyring."))
