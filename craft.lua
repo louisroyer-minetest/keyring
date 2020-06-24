@@ -64,6 +64,14 @@ minetest.register_craftitem("keyring:keyring", {
 	on_secondary_use = function(itemstack, placer, pointed_thing)
 		return keyring.formspec(itemstack, placer)
 	end,
+	-- mod doc
+	_doc_items_longdesc = S("A keyring to store your keys."),
+	_doc_items_usagehelp = S("Left-click on a locked node to select a key, "
+		.."then works as a regular key. "
+		.."Some nodes support right-clicking to select key and open at once.\n"
+		.."Click pointing no node to access key-management interface "
+		.."(keys can be renamed or taken off).\n"
+		.."Some crafts let you add keys to the keyring."),
 })
 
 -- list of wires since there is currently no group:wire in basic_materials

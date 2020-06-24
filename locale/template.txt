@@ -3,9 +3,13 @@
 
 ### craft.lua ###
 
+A keyring to store your keys.=
 Key found in keyring and selected (@1).=
 Key not found in keyring.=
 Keyring=
+
+Left-click on a locked node to select a key, then works as a regular key. Some nodes support right-clicking to select key and open at once.@nClick pointing no node to access key-management interface (keys can be renamed or taken off).@nSome crafts let you add keys to the keyring.=
+
 
 ### formspec.lua ###
 
