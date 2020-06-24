@@ -11,4 +11,5 @@ end
 
 dofile(MP.."/meta_fields.lua")
 dofile(MP.."/formspec.lua")
-dofile(MP.."/craft.lua")
+dofile(MP.."/craft_common.lua")
+dofile(MP.."/craft_keyring.lua")
