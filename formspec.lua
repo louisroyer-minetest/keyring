@@ -203,7 +203,7 @@ keyring.formspec = function(itemstack, player)
 			formspec = formspec.."6"
 		else
 			-- has keyring_inspect privilege but is not owner
-			formspec = formspec.."9"
+			formspec = formspec.."8"
 		end
 	else
 		formspec = formspec.."7"
