@@ -1,10 +1,10 @@
-# minetest-keyring [![Build Status](https://travis-ci.org/louisroyer/minetest-keyring.svg?branch=master)](https://travis-ci.org/louisroyer/minetest-keyring)
+# Keyring [![Build Status](https://travis-ci.org/louisroyer/minetest-keyring.svg?branch=master)](https://travis-ci.org/louisroyer/minetest-keyring)
 
 This minetest mod adds keyrings.
 Keyrings can be used to store keys.
 Once keys are stored in the keyring, they can be used as a regular keys.
 
-personal keyrings are a variant of keyrings allowing to set access and configuration to keys private.
+Personal keyrings are a variant of keyrings allowing to set access and configuration to keys private.
 
 ## Craft
 ### Keyring
@@ -26,7 +26,7 @@ group:key wire   group:key
 This gives back 4 `basic_materials:empty_spool`.
 In both crafts, items keys (or `group:key`) items will be added to the resulting keyring.
 
-### personal keyring (shapeless)
+### Personal keyring (shapeless)
 - `keyring:keyring`
 - `basic_materials:padlock`
 
