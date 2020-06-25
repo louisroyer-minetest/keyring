@@ -60,20 +60,21 @@ minetest.register_craft({
 
 
 -- reset secret when a non owner take the keyring in inventory
-minetest.register_on_player_inventory_action(function(player, action, inventory, inventory_info)
-	if action == "take" or action == "put" then
-		local player_inv = player:get_inventory()
-		if player_inv:contains_item("main", ItemStack("keyring:personnal_keyring")) then
-			local player_name = player:get_player_name()
-			for pos, item in ipairs(player_inv:get_list("main")) do
-				local meta = item:get_meta()
-				local owner = meta:get_string("owner")
-				if owner and owner ~= "" and owner ~= player_name then
-					meta:set_string("secret", "")
+minetest.register_on_player_inventory_action(
+	function(player, action, inventory, inventory_info)
+		if action == "take" or action == "put" then
+			local player_inv = player:get_inventory()
+			if player_inv:contains_item("main",
+				ItemStack("keyring:personnal_keyring")) then
+				local player_name = player:get_player_name()
+				for pos, item in ipairs(player_inv:get_list("main")) do
+					local meta = item:get_meta()
+					local owner = meta:get_string("owner")
+					if owner and owner ~= "" and owner ~= player_name then
+						meta:set_string("secret", "")
+					end
+					player_inv:set_stack("main", pos, item)
 				end
-				player_inv:set_stack("main", pos, item)
 			end
 		end
-	end
-
 end)

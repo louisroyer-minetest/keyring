@@ -126,8 +126,8 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 				local groups = item:get_definition().groups
 				if (not keyring_allowed) and groups and groups.key == 1 then
 					-- put all craft material back
-					for position, item in pairs(old_craft_grid) do
-						craft_inv:set_stack("craft", position, item)
+					for p, i in pairs(old_craft_grid) do
+						craft_inv:set_stack("craft", p, i)
 					end
 					-- cancel craft result
 					return ItemStack(nil)
