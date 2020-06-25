@@ -27,19 +27,21 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 
 		-- check abuses
 		local item = player:get_wielded_item()
-		if item:get_name() ~= "keyring:keyring" then
+		local meta = item:get_meta()
+		if item:get_name() ~= "keyring:keyring"
+			and item:get_name() ~= "keyring:personnal_keyring" then
 			keyring.log("Player "..name..
 				" sent a keyring action but has no keyring in hand.")
 			return
 		end
-		local krs = item:get_meta():get_string(keyring.fields.KRS)
+		local krs = meta:get_string(keyring.fields.KRS)
 		if krs ~= context[name] then
 			keyring.log("Player "..name
 				.." sent a keyring action but has not the right keyring in hand.")
 			return
 		end
 
-		local keyring_owner = item:get_meta():get_string("owner")
+		local keyring_owner = meta:get_string("owner")
 		local keyring_allowed = (keyring_owner == nil)
 			or (keyring_owner == name) or (keyring_owner == "")
 		if not keyring_allowed then
@@ -49,13 +51,25 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			return
 		end
 
+		-- make owner
+		if fields.make_private ~= nil then
+			if fields.make_private == "true" then
+				meta:set_string("owner", name)
+			elseif fields.make_private == "false" then
+				meta:set_string("owner", "")
+			end
+			player:set_wielded_item(item)
+			keyring.formspec(item, minetest.get_player_by_name(name))
+		end
+
 		-- key selection
 		if fields.selected_key ~= nil then
 			local event = minetest.explode_textlist_event(fields.selected_key)
 			if event.type ~= "INV" then
 				if key_list[name] == nil or event.index > #key_list[name] then
 					keyring.log("Player "..name
-						.." selected a key in keyring interface but this key does not exist.")
+						.." selected a key in keyring interface"
+						.." but this key does not exist.")
 					return
 				end
 				selected[name] = event.index
@@ -77,7 +91,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 				and fields.new_name and fields.new_name ~= "" and selected[name] then
 				local u_krs = minetest.deserialize(krs)
 				u_krs[key_list[name][selected[name]]].user_description = fields.new_name
-				item:get_meta():set_string(keyring.fields.KRS, minetest.serialize(u_krs))
+				meta:set_string(keyring.fields.KRS, minetest.serialize(u_krs))
 				player:set_wielded_item(item)
 				keyring.formspec(item, minetest.get_player_by_name(name))
 				return
@@ -111,7 +125,8 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 					-- add key to inventory
 					inv:add_item("main", key)
 				else
-					minetest.chat_send_player(name, S("There is no room in your inventory for a key."))
+					minetest.chat_send_player(name,
+						S("There is no room in your inventory for a key."))
 				end
 				return
 			end
@@ -167,13 +182,26 @@ keyring.formspec = function(itemstack, player)
 			..(keyring_owner or "unknown player"))
 		return itemstack
 	end
+	local keyring_type = itemstack:get_name()
 	local name = player:get_player_name()
 	local krs = itemstack:get_meta():get_string(keyring.fields.KRS)
 	local formspec = "formspec_version[3]"
 		.."size[10.75,11.25]"
 		.."label[1,1;"..F(S("List of keys in the keyring")).."]"
-		.."textlist[1,1.75;8.75,7;selected_key;"..get_key_list(krs, name).."]"
-		.."button[1,9;5,1;rename;"..F(S("Rename key")).."]"
+		.."textlist[1,1.75;8.75,"
+	if keyring_type == "keyring:personnal_keyring" then
+		formspec = formspec.."6"
+	else
+		formspec = formspec.."7"
+	end
+	formspec = formspec..";selected_key;"..get_key_list(krs, name).."]"
+	if keyring_type == "keyring:personnal_keyring" then
+		formspec = formspec.."checkbox[1,8.5;make_private;"
+			..F(S("Make this keyring private"))
+			..";"..((keyring_owner and keyring_owner ~="") and "true" or "false")
+			.."]"
+	end
+	formspec = formspec.."button[1,9;5,1;rename;"..F(S("Rename key")).."]"
 		.."field[6.5,9;3.25,1;new_name;;]"
 		.."field_close_on_enter[new_name;false]"
 		.."button[1,10;5,1;remove;"..F(S("Remove key")).."]"

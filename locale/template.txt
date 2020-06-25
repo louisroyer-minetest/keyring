@@ -1,20 +1,32 @@
 # textdomain: keyring
 
 
-### craft.lua ###
+### craft_common.lua ###
 
-A keyring to store your keys.=
 Key found in keyring and selected (@1).=
 Key not found in keyring.=
+
+### craft_keyring.lua ###
+
+A keyring to store your keys.=
 Keyring=
+
+### craft_keyring.lua ###
+### craft_personnal_keyring.lua ###
 
 Left-click on a locked node to select a key, then works as a regular key. Some nodes support right-clicking to select key and open at once.@nClick pointing no node to access key-management interface (keys can be renamed or taken off).@nSome crafts let you add keys to the keyring.=
 
+
+### craft_personnal_keyring.lua ###
+
+A personnal keyring to store your keys.=
+Personnal Keyring=
 
 ### formspec.lua ###
 
 Exit=
 List of keys in the keyring=
+Make this keyring private=
 Remove key=
 Rename key=
 There is no room in your inventory for a key.=

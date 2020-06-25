@@ -1,0 +1,1 @@
+keyring.personnal_keyring (Enable personnal keyrings) bool true

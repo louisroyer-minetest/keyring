@@ -1,20 +1,32 @@
 # textdomain: keyring
 
 
-### craft.lua ###
+### craft_common.lua ###
 
-A keyring to store your keys.=Un trousseau pour stocker vos clés.
 Key found in keyring and selected (@1).=La clé est dans ce trousseau et a été sélectionnée (@1).
 Key not found in keyring.=La clé n’est pas dans ce trousseau
+
+### craft_keyring.lua ###
+
+A keyring to store your keys.=Un trousseau pour stocker vos clés.
 Keyring=Trousseau
+
+### craft_keyring.lua ###
+### craft_personnal_keyring.lua ###
 
 Left-click on a locked node to select a key, then works as a regular key. Some nodes support right-clicking to select key and open at once.@nClick pointing no node to access key-management interface (keys can be renamed or taken off).@nSome crafts let you add keys to the keyring.=Clic gauche sur un bloc verrouillé pour sélectionner une clé ; fonctionne ensuite comme n’importe quelle clé. Certains blocs permettent de faire un clic droit pour sélectionner la clé et ouvrir en une seule fois.@nFaites un clic en ne pointant pas de bloc pour accéder à l’interface de gestion de clés (les clés peuvent être renommées ou retirées).@nCertaines recettes vous permettent d’ajouter des clés au trousseau.
 
+
+### craft_personnal_keyring.lua ###
+
+A personnal keyring to store your keys.=Un trousseau personnel pour stocker vos clés.
+Personnal Keyring=Trousseau personnel
 
 ### formspec.lua ###
 
 Exit=Quitter
 List of keys in the keyring=Listes des clés dans le trousseau
+Make this keyring private=Rendre ce trousseau privé
 Remove key=Retirer la clé
 Rename key=Renommer la clé
 There is no room in your inventory for a key.=Il n’y a pas de place dans votre inventaire pour une clé.
