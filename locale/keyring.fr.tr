@@ -24,6 +24,7 @@ Personnal Keyring=Trousseau personnel
 
 ### formspec.lua ###
 
+(owned by @1)=(appartient à @1)
 Exit=Quitter
 List of keys in the keyring=Listes des clés dans le trousseau
 Make this keyring private=Rendre ce trousseau privé

@@ -24,6 +24,7 @@ Personnal Keyring=
 
 ### formspec.lua ###
 
+(owned by @1)=
 Exit=
 List of keys in the keyring=
 Make this keyring private=
