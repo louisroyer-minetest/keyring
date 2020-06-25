@@ -166,11 +166,13 @@ minetest.register_craft_predict(function(itemstack, player, old_craft_grid, craf
 			end
 		end
 		-- if exit loop then craft is allowed
-		local meta = itemstack:get_meta()
-		meta:set_string("description",
-			ItemStack("keyring:personnal_keyring"):get_description()
-			.." "..S("(owned by @1)", play_name))
-		meta:set_string("owner", play_name)
+		if is_owned then
+			local meta = itemstack:get_meta()
+			meta:set_string("description",
+				ItemStack("keyring:personnal_keyring"):get_description()
+				.." "..S("(owned by @1)", play_name))
+			meta:set_string("owner", play_name)
+		end
 		return itemstack
 	end
 end)
