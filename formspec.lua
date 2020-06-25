@@ -29,7 +29,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		local item = player:get_wielded_item()
 		local meta = item:get_meta()
 		if item:get_name() ~= "keyring:keyring"
-			and item:get_name() ~= "keyring:personnal_keyring" then
+			and item:get_name() ~= "keyring:personal_keyring" then
 			keyring.log("Player "..name..
 				" sent a keyring action but has no keyring in hand.")
 			return
@@ -58,12 +58,12 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			if fields.make_private == "true" then
 				meta:set_string("owner", name)
 				meta:set_string("description",
-					ItemStack("keyring:personnal_keyring"):get_description()
+					ItemStack("keyring:personal_keyring"):get_description()
 					.." "..S("(owned by @1)", name))
 			elseif fields.make_private == "false" then
 				meta:set_string("owner", "")
 				meta:set_string("description",
-					ItemStack("keyring:personnal_keyring"):get_description())
+					ItemStack("keyring:personal_keyring"):get_description())
 			end
 			player:set_wielded_item(item)
 			keyring.formspec(item, minetest.get_player_by_name(name))
@@ -198,7 +198,7 @@ keyring.formspec = function(itemstack, player)
 		.."size[10.75,11.25]"
 		.."label[1,1;"..F(S("List of keys in the keyring")).."]"
 		.."textlist[1,1.75;8.75,"
-	if keyring_type == "keyring:personnal_keyring" then
+	if keyring_type == "keyring:personal_keyring" then
 		if keyring_allowed then
 			formspec = formspec.."6"
 		else
@@ -210,7 +210,7 @@ keyring.formspec = function(itemstack, player)
 	end
 	formspec = formspec..";selected_key;"..get_key_list(krs, name).."]"
 	if keyring_allowed then
-		if keyring_type == "keyring:personnal_keyring" then
+		if keyring_type == "keyring:personal_keyring" then
 			formspec = formspec.."checkbox[1,8.5;make_private;"
 				..F(S("Make this keyring private"))
 				..";"..((keyring_owner and keyring_owner ~="") and "true" or "false")

@@ -18,15 +18,15 @@ A keyring to store your keys.=Un trousseau pour stocker vos clés.
 Keyring=Trousseau
 
 ### craft_keyring.lua ###
-### craft_personnal_keyring.lua ###
+### craft_personal_keyring.lua ###
 
 Left-click on a locked node to select a key, then works as a regular key. Some nodes support right-clicking to select key and open at once.@nClick pointing no node to access key-management interface (keys can be renamed or taken off).@nSome crafts let you add keys to the keyring.=Clic gauche sur un bloc verrouillé pour sélectionner une clé ; fonctionne ensuite comme n’importe quelle clé. Certains blocs permettent de faire un clic droit pour sélectionner la clé et ouvrir en une seule fois.@nFaites un clic en ne pointant pas de bloc pour accéder à l’interface de gestion de clés (les clés peuvent être renommées ou retirées).@nCertaines recettes vous permettent d’ajouter des clés au trousseau.
 
 
-### craft_personnal_keyring.lua ###
+### craft_personal_keyring.lua ###
 
-A personnal keyring to store your keys.=Un trousseau personnel pour stocker vos clés.
-Personnal Keyring=Trousseau personnel
+A personal keyring to store your keys.=Un trousseau personnel pour stocker vos clés.
+Personal Keyring=Trousseau personnel
 
 ### formspec.lua ###
 

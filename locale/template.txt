@@ -18,15 +18,15 @@ A keyring to store your keys.=
 Keyring=
 
 ### craft_keyring.lua ###
-### craft_personnal_keyring.lua ###
+### craft_personal_keyring.lua ###
 
 Left-click on a locked node to select a key, then works as a regular key. Some nodes support right-clicking to select key and open at once.@nClick pointing no node to access key-management interface (keys can be renamed or taken off).@nSome crafts let you add keys to the keyring.=
 
 
-### craft_personnal_keyring.lua ###
+### craft_personal_keyring.lua ###
 
-A personnal keyring to store your keys.=
-Personnal Keyring=
+A personal keyring to store your keys.=
+Personal Keyring=
 
 ### formspec.lua ###
 
