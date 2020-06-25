@@ -2,7 +2,7 @@
 
 This minetest mod adds keyrings.
 Keyrings can be used to store keys.
-Once keys are stored in the keyring, they can be used as a regular keys.
+Once keys are stored in the keyring, keyrings can be used as a regular key.
 
 Personal keyrings are a variant of keyrings allowing to set access and configuration to keys private.
 
@@ -24,7 +24,7 @@ group:key wire   group:key
 ```
 
 This gives back 4 `basic_materials:empty_spool`.
-In both crafts, items keys (or `group:key`) items will be added to the resulting keyring.
+In both crafts, keys (or `group:key`) items will be added to the resulting keyring.
 
 ### Personal keyring (shapeless)
 - `keyring:keyring`
