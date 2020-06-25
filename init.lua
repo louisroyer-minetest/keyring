@@ -13,6 +13,7 @@ keyring.log = function(s)
 	minetest.log("[keyring] "..s)
 end
 
+dofile(MP.."/privileges.lua")
 dofile(MP.."/meta_fields.lua")
 dofile(MP.."/formspec.lua")
 dofile(MP.."/craft_common.lua")

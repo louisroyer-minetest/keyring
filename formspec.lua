@@ -45,9 +45,11 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		local keyring_allowed = (keyring_owner == nil)
 			or (keyring_owner == name) or (keyring_owner == "")
 		if not keyring_allowed then
-			keyring.log(player:get_player_name()
-				.." sent command to manage keys of a keyring owned by "
-				..(keyring_owner or "unknown player"))
+			if not minetest.check_player_privs(name, { keyring_inspect=true }) then
+				keyring.log(player:get_player_name()
+					.." sent command to manage keys of a keyring owned by "
+					..(keyring_owner or "unknown player"))
+			end
 			return
 		end
 
@@ -182,7 +184,8 @@ keyring.formspec = function(itemstack, player)
 	local keyring_allowed = (keyring_owner == nil)
 		or (keyring_owner == player:get_player_name())
 		or (keyring_owner == "")
-	if not keyring_allowed then
+	local has_list_priv = minetest.check_player_privs(name, { keyring_inspect=true })
+	if not (keyring_allowed or has_list_priv) then
 		keyring.log(player:get_player_name()
 			.." tryed to access key management of a keyring owned by "
 			..(keyring_owner or "unknown player"))
@@ -196,22 +199,29 @@ keyring.formspec = function(itemstack, player)
 		.."label[1,1;"..F(S("List of keys in the keyring")).."]"
 		.."textlist[1,1.75;8.75,"
 	if keyring_type == "keyring:personnal_keyring" then
-		formspec = formspec.."6"
+		if keyring_allowed then
+			formspec = formspec.."6"
+		else
+			-- has keyring_inspect privilege but is not owner
+			formspec = formspec.."9"
+		end
 	else
 		formspec = formspec.."7"
 	end
 	formspec = formspec..";selected_key;"..get_key_list(krs, name).."]"
-	if keyring_type == "keyring:personnal_keyring" then
-		formspec = formspec.."checkbox[1,8.5;make_private;"
-			..F(S("Make this keyring private"))
-			..";"..((keyring_owner and keyring_owner ~="") and "true" or "false")
-			.."]"
+	if keyring_allowed then
+		if keyring_type == "keyring:personnal_keyring" then
+			formspec = formspec.."checkbox[1,8.5;make_private;"
+				..F(S("Make this keyring private"))
+				..";"..((keyring_owner and keyring_owner ~="") and "true" or "false")
+				.."]"
+		end
+		formspec = formspec.."button[1,9;5,1;rename;"..F(S("Rename key")).."]"
+			.."field[6.5,9;3.25,1;new_name;;]"
+			.."field_close_on_enter[new_name;false]"
+			.."button[1,10;5,1;remove;"..F(S("Remove key")).."]"
 	end
-	formspec = formspec.."button[1,9;5,1;rename;"..F(S("Rename key")).."]"
-		.."field[6.5,9;3.25,1;new_name;;]"
-		.."field_close_on_enter[new_name;false]"
-		.."button[1,10;5,1;remove;"..F(S("Remove key")).."]"
-		.."button_exit[6.5,10;3.25,1;exit;"..F(S("Exit")).."]"
+	formspec = formspec.."button_exit[6.5,10;3.25,1;exit;"..F(S("Exit")).."]"
 
 	-- context
 	context[name] = krs

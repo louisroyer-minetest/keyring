@@ -34,9 +34,13 @@ group:key wire   group:key
 This gives back 4 `basic_materials:empty_spool`.
 In both crafts, items keys (or `group:key`) items will be added to the resulting keyring.
 
+### Personnal keyring (shapeless)
+- `keyring:keyring`
+- `basic_materials:padlock`
+
 ### Add a key to the keyring (shapeless)
 - `group:key` (`default:key` or `keyring:keyring`)
-- `keyring:keyring`
+- `keyring:keyring`/`keyring:personnal_keyring`
 
 
 ## Dependencies
@@ -50,3 +54,6 @@ In both crafts, items keys (or `group:key`) items will be added to the resulting
 
 ## Settings
 Setting `keyring.personnal_keyring` is available to disable/enable personnal keyring (enabled by default).
+
+## Privileges
+You can grant the privilege `keyring_inspect` to allow a player to list keys of personnal keyrings owned by other players.

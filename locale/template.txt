@@ -38,3 +38,7 @@ Rename key=
 There is no room in your inventory for a key.=
 You must enter a name first.=
 You must select a key first.=
+
+### privileges.lua ###
+
+Can list keys of private keyrings owned by other players=

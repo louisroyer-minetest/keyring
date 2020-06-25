@@ -38,3 +38,7 @@ Rename key=Renommer la clé
 There is no room in your inventory for a key.=Il n’y a pas de place dans votre inventaire pour une clé.
 You must enter a name first.=Vous devez d’abord entrer un nom.
 You must select a key first.=Vous devez d’abord sélectionner une clé.
+
+### privileges.lua ###
+
+Can list keys of private keyrings owned by other players=Permettre de lister les clés d’un trousseau privé qui appartient à d’autres joueurs
