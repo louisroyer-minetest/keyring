@@ -108,7 +108,7 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 				keyring.log(player:get_player_name().." used a personnal keyring owned by "
 					..(keyring_owner or "unknown player").." in a craft")
 					-- give it back
-					craft_inv[position] = item
+					craft_inv:set_stack("craft", position, item)
 			end
 		end
 		-- write secrets in keyring.fields.KRS
