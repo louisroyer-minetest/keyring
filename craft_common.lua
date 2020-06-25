@@ -64,13 +64,14 @@ end
 -- add key used to craft into keyring
 minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv)
 	local res_name = itemstack:get_name()
+	local play_name = player:get_player_name()
 	if (res_name == "keyring:keyring") or (res_name == "keyring:personnal_keyring") then
 		local secrets = {}
 		for position, item in pairs(old_craft_grid) do
 			local item_name = item:get_name()
 			local keyring_owner = item:get_meta():get_string("owner")
 			local keyring_allowed = (keyring_owner == nil)
-				or (keyring_owner == player:get_player_name())
+				or (keyring_owner == play_name)
 				or (keyring_owner == "")
 			-- check item is of group key
 			local groups = item:get_definition().groups
@@ -102,7 +103,7 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 					end
 				end
 			elseif item_name == "keyring:personnal_keyring" and not keyring_allowed then
-				keyring.log(player:get_player_name().." used a personnal keyring owned by "
+				keyring.log(play_name.." used a personnal keyring owned by "
 					..(keyring_owner or "unknown player").." in a craft")
 					-- give it back
 					craft_inv:set_stack("craft", position, item)
@@ -118,7 +119,7 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 			for position, item in pairs(old_craft_grid) do
 				local keyring_owner = item:get_meta():get_string("owner")
 				local keyring_allowed = (keyring_owner == nil)
-					or (keyring_owner == player:get_player_name())
+					or (keyring_owner == play_name)
 					or (keyring_owner == "")
 				if (not keyring_allowed) and groups and groups.key == 1 then
 					-- put all craft material back
@@ -127,7 +128,7 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 					end
 					-- cancel craft result
 					return
-				elseif (not is_owned) and keyring_owner == player:get_player_name()
+				elseif (not is_owned) and keyring_owner == play_name
 					and groups and groups.key == 1 then
 					is_owned = true
 				end
@@ -137,8 +138,8 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 			if is_owned then
 				meta:set_string("description",
 					ItemStack("keyring:personnal_keyring"):get_description()
-					.." "..S("(owned by @1)", name))
-				meta:set_string("owner", player:get_player_name())
+					.." "..S("(owned by @1)", play_name))
+				meta:set_string("owner", play_name)
 			end
 		end
 		return itemstack
@@ -148,16 +149,18 @@ end)
 -- forbid craft if using and owned personnal_keyring
 minetest.register_craft_predict(function(itemstack, player, old_craft_grid, craft_inv)
 	local res_name = itemstack:get_name()
+	local play_name = player:get_player_name()
 	if res_name == "keyring:personnal_keyring" then
 		local is_owned = false
 		for position, item in pairs(old_craft_grid) do
 			local keyring_owner = item:get_meta():get_string("owner")
 			local keyring_allowed = (keyring_owner == nil)
-				or (keyring_owner == player:get_player_name())
+				or (keyring_owner == play_name)
 				or (keyring_owner == "")
+			local groups = item:get_definition().groups
 			if (not keyring_allowed) and groups and groups.key == 1 then
 				return
-			elseif (not is_owned) and keyring_owner == player:get_player_name()
+			elseif (not is_owned) and keyring_owner == play_name
 				and groups and groups.key == 1 then
 				is_owned = true
 			end
@@ -166,8 +169,8 @@ minetest.register_craft_predict(function(itemstack, player, old_craft_grid, craf
 		local meta = itemstack:get_meta()
 		meta:set_string("description",
 			ItemStack("keyring:personnal_keyring"):get_description()
-			.." "..S("(owned by @1)", name))
-		meta:set_string("owner", player:get_player_name())
+			.." "..S("(owned by @1)", play_name))
+		meta:set_string("owner", play_name)
 		return itemstack
 	end
 end)
