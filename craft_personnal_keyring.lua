@@ -32,3 +32,16 @@ minetest.register_craftitem("keyring:personnal_keyring", {
 		.."(keys can be renamed or taken off).\n"
 		.."Some crafts let you add keys to the keyring."),
 })
+
+minetest.register_craft({
+	output = "keyring:personnal_keyring",
+	recipe = { "keyring:keyring", "basic_materials:padlock" },
+	type = shapeless,
+})
+
+-- craft to add a key
+minetest.register_craft({
+	output = "keyring:personnal_keyring",
+	recipe = { "keyring:personnal_keyring", "group:key" },
+	type = "shapeless",
+})

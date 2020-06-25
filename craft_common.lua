@@ -60,18 +60,14 @@ keyring.craft_common.keyring_on_place = function(itemstack, placer, pointed_thin
 	return key_on_place(is, placer, pointed_thing)
 end
 
--- craft to add a key
-minetest.register_craft({
-	output = "keyring:keyring",
-	recipe = { "keyring:keyring", "group:key" },
-	type = "shapeless",
-})
 
 -- add key used to craft into keyring
 minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv)
-	if (itemstack:get_name() == "keyring:keyring") then
+	local res_name = itemstack:get_name()
+	if (res_name == "keyring:keyring") or (res_name == "keyring:personnal_keyring") then
 		local secrets = {}
 		for position, item in pairs(old_craft_grid) do
+			local item_name = item:get_name()
 			local keyring_owner = item:get_meta():get_string("owner")
 			local keyring_allowed = (keyring_owner == nil)
 				or (keyring_owner == player:get_player_name())
@@ -90,7 +86,8 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 							secrets[k].number = secrets[k].number + v.number
 						end
 					end
-				elseif item:get_name() ~= "keyring:keyring" then
+				elseif item_name ~= "keyring:keyring" and
+					item_name ~= "keyring:personnal_keyring" then
 					-- else extract secret
 					local secret = item:get_meta():get_string("secret")
 					if not keyring.fields.utils.KRS.in_keyring(secrets, secret) then
@@ -104,15 +101,73 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 						secrets[secret].number = secrets[secret].number + 1
 					end
 				end
-			elseif item:get_name() == "keyring:personnal_keyring" and not keyring_allowed then
+			elseif item_name == "keyring:personnal_keyring" and not keyring_allowed then
 				keyring.log(player:get_player_name().." used a personnal keyring owned by "
 					..(keyring_owner or "unknown player").." in a craft")
 					-- give it back
 					craft_inv:set_stack("craft", position, item)
 			end
 		end
+		local meta = itemstack:get_meta()
 		-- write secrets in keyring.fields.KRS
-		itemstack:get_meta():set_string(keyring.fields.KRS, minetest.serialize(secrets))
+		meta:set_string(keyring.fields.KRS, minetest.serialize(secrets))
+
+		-- write owner
+		if res_name == "keyring:personnal_keyring" then
+			local is_owned = false
+			for position, item in pairs(old_craft_grid) do
+				local keyring_owner = item:get_meta():get_string("owner")
+				local keyring_allowed = (keyring_owner == nil)
+					or (keyring_owner == player:get_player_name())
+					or (keyring_owner == "")
+				if (not keyring_allowed) and groups and groups.key == 1 then
+					-- put all craft material back
+					for position, item in pairs(old_craft_grid) do
+						craft_inv:set_stack("craft", position, item)
+					end
+					-- cancel craft result
+					return
+				elseif (not is_owned) and keyring_owner == player:get_player_name()
+					and groups and groups.key == 1 then
+					is_owned = true
+				end
+
+			end
+			-- if exit loop then craft is allowed
+			if is_owned then
+				meta:set_string("description",
+					ItemStack("keyring:personnal_keyring"):get_description()
+					.." "..S("(owned by @1)", name))
+				meta:set_string("owner", player:get_player_name())
+			end
+		end
+		return itemstack
+	end
+end)
+
+-- forbid craft if using and owned personnal_keyring
+minetest.register_craft_predict(function(itemstack, player, old_craft_grid, craft_inv))
+	local res_name = itemstack:get_name()
+	if res_name == "keyring:personnal_keyring" then
+		local is_owned = false
+		for position, item in pairs(old_craft_grid) do
+			local keyring_owner = item:get_meta():get_string("owner")
+			local keyring_allowed = (keyring_owner == nil)
+				or (keyring_owner == player:get_player_name())
+				or (keyring_owner == "")
+			if (not keyring_allowed) and groups and groups.key == 1 then
+				return
+			elseif (not is_owned) and keyring_owner == player:get_player_name()
+				and groups and groups.key == 1 then
+				is_owned = true
+			end
+		end
+		-- if exit loop then craft is allowed
+		local meta = itemstack:get_meta()
+		meta:set_string("description",
+			ItemStack("keyring:personnal_keyring"):get_description()
+			.." "..S("(owned by @1)", name))
+		meta:set_string("owner", player:get_player_name())
 		return itemstack
 	end
 end)

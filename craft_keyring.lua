@@ -73,3 +73,11 @@ for _, wire in pairs(wires) do
 		},
 	})
 end
+
+
+-- craft to add a key
+minetest.register_craft({
+	output = "keyring:keyring",
+	recipe = { "keyring:keyring", "group:key" },
+	type = "shapeless",
+})
