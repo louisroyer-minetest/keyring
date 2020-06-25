@@ -5,6 +5,8 @@ This minetest mod adds keyrings.
 Keyrings can be used to store keys.
 Once keys are stored in the keyring, they can be used as a regular keys.
 
+Personnal keyrings are a variant of keyrings allowing to set access and configuration to keys private.
+
 ## Missing features
 - [ ] Keyring texture (current is placeholder)
 - [ ] Tests on a multiplayer server
@@ -45,3 +47,6 @@ In both crafts, items keys (or `group:key`) items will be added to the resulting
 
 ## License
 - CC0-1.0, Louis Royer 2020
+
+## Settings
+Setting `keyring.personnal_keyring` is available to disable/enable personnal keyring (enabled by default).
