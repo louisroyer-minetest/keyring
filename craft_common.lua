@@ -146,7 +146,7 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 end)
 
 -- forbid craft if using and owned personnal_keyring
-minetest.register_craft_predict(function(itemstack, player, old_craft_grid, craft_inv))
+minetest.register_craft_predict(function(itemstack, player, old_craft_grid, craft_inv)
 	local res_name = itemstack:get_name()
 	if res_name == "keyring:personnal_keyring" then
 		local is_owned = false
