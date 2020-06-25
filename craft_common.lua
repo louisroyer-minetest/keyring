@@ -121,6 +121,7 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 				local keyring_allowed = (keyring_owner == nil)
 					or (keyring_owner == play_name)
 					or (keyring_owner == "")
+				local groups = item:get_definition().groups
 				if (not keyring_allowed) and groups and groups.key == 1 then
 					-- put all craft material back
 					for position, item in pairs(old_craft_grid) do

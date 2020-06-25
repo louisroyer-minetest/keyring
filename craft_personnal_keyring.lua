@@ -1,6 +1,17 @@
 -- Translation support
 local S = minetest.get_translator("keyring")
 
+--[[
+-- Clear secret if this is a personnal keyring with an owner
+--]]
+function on_drop_personnal_keyring(itemstack, dropper, pos)
+	local meta = itemstack:get_meta()
+	local owner = meta:get_string("owner")
+	if owner and owner ~= "" then
+		meta:set_string("secret", "")
+	end
+	return minetest.item_drop(itemstack, dropper, pos)
+end
 minetest.register_craftitem("keyring:personnal_keyring", {
 	description = S("Personnal Keyring"),
 	inventory_image = "keyring_keyring.png",
@@ -23,6 +34,7 @@ minetest.register_craftitem("keyring:personnal_keyring", {
 	on_secondary_use = function(itemstack, placer, pointed_thing)
 		return keyring.formspec(itemstack, placer)
 	end,
+	on_drop = on_drop_personnal_keyring,
 	-- mod doc
 	_doc_items_longdesc = S("A personnal keyring to store your keys."),
 	_doc_items_usagehelp = S("Left-click on a locked node to select a key, "
@@ -45,3 +57,23 @@ minetest.register_craft({
 	recipe = { "keyring:personnal_keyring", "group:key" },
 	type = "shapeless",
 })
+
+
+-- reset secret when a non owner take the keyring in inventory
+minetest.register_on_player_inventory_action(function(player, action, inventory, inventory_info)
+	if action == "take" or action == "put" then
+		local player_inv = player:get_inventory()
+		if player_inv:contains_item("main", ItemStack("keyring:personnal_keyring")) then
+			local player_name = player:get_player_name()
+			for pos, item in ipairs(player_inv:get_list("main")) do
+				local meta = item:get_meta()
+				local owner = meta:get_string("owner")
+				if owner and owner ~= "" and owner ~= player_name then
+					meta:set_string("secret", "")
+				end
+				player_inv:set_stack("main", pos, item)
+			end
+		end
+	end
+
+end)
