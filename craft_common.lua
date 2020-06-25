@@ -29,6 +29,8 @@ keyring.craft_common.select_key = function(itemstack, placer, meta)
 			keyring.fields.KRS) == i_meta:get_string(keyring.fields.KRS) then
 			placer:set_wielded_item(itemstack)
 		end
+		minetest.chat_send_player(name, S("You are not allowed to use this keyring."))
+		return
 	end
 	if secret ~= "" and keyring.fields.utils.KRS.in_serialized_keyring(
 		itemstack, secret) then

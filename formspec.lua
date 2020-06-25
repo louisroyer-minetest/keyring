@@ -177,6 +177,7 @@ end
 -- player: the player to show formspec
 --]]
 keyring.formspec = function(itemstack, player)
+	local name = player:get_player_name()
 	local keyring_owner = itemstack:get_meta():get_string("owner")
 	local keyring_allowed = (keyring_owner == nil)
 		or (keyring_owner == player:get_player_name())
@@ -185,10 +186,10 @@ keyring.formspec = function(itemstack, player)
 		keyring.log(player:get_player_name()
 			.." tryed to access key management of a keyring owned by "
 			..(keyring_owner or "unknown player"))
+		minetest.chat_send_player(name, S("You are not allowed to use this keyring."))
 		return itemstack
 	end
 	local keyring_type = itemstack:get_name()
-	local name = player:get_player_name()
 	local krs = itemstack:get_meta():get_string(keyring.fields.KRS)
 	local formspec = "formspec_version[3]"
 		.."size[10.75,11.25]"

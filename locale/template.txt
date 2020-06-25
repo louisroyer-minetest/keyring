@@ -6,6 +6,12 @@
 Key found in keyring and selected (@1).=
 Key not found in keyring.=
 
+### craft_common.lua ###
+### formspec.lua ###
+
+(owned by @1)=
+You are not allowed to use this keyring.=
+
 ### craft_keyring.lua ###
 
 A keyring to store your keys.=
@@ -24,7 +30,6 @@ Personnal Keyring=
 
 ### formspec.lua ###
 
-(owned by @1)=
 Exit=
 List of keys in the keyring=
 Make this keyring private=

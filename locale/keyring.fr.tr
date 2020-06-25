@@ -4,7 +4,13 @@
 ### craft_common.lua ###
 
 Key found in keyring and selected (@1).=La clé est dans ce trousseau et a été sélectionnée (@1).
-Key not found in keyring.=La clé n’est pas dans ce trousseau
+Key not found in keyring.=La clé n’est pas dans ce trousseau.
+
+### craft_common.lua ###
+### formspec.lua ###
+
+(owned by @1)=(appartient à @1)
+You are not allowed to use this keyring.=Vous n’êtes pas autorisé à utiliser ce trousseau.
 
 ### craft_keyring.lua ###
 
@@ -24,7 +30,6 @@ Personnal Keyring=Trousseau personnel
 
 ### formspec.lua ###
 
-(owned by @1)=(appartient à @1)
 Exit=Quitter
 List of keys in the keyring=Listes des clés dans le trousseau
 Make this keyring private=Rendre ce trousseau privé
