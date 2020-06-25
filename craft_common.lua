@@ -127,7 +127,7 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 						craft_inv:set_stack("craft", position, item)
 					end
 					-- cancel craft result
-					return
+					return ItemStack(nil)
 				elseif (not is_owned) and keyring_owner == play_name
 					and groups and groups.key == 1 then
 					is_owned = true
@@ -159,7 +159,7 @@ minetest.register_craft_predict(function(itemstack, player, old_craft_grid, craf
 				or (keyring_owner == "")
 			local groups = item:get_definition().groups
 			if (not keyring_allowed) and groups and groups.key == 1 then
-				return
+				return ItemStack(nil)
 			elseif (not is_owned) and keyring_owner == play_name
 				and groups and groups.key == 1 then
 				is_owned = true
