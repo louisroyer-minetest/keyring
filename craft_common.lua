@@ -144,6 +144,7 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 					.." "..S("(owned by @1)", play_name))
 				meta:set_string("owner", play_name)
 			end
+			--TODO: copy shared field
 		end
 		return itemstack
 	end
