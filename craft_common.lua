@@ -69,6 +69,8 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 	local play_name = player:get_player_name()
 	if (res_name == "keyring:keyring") or (res_name == "keyring:personal_keyring") then
 		local secrets = {}
+		local is_owned = false
+		local shared = ""
 		for position, item in pairs(old_craft_grid) do
 			local item_name = item:get_name()
 			local keyring_owner = item:get_meta():get_string("owner")
@@ -89,6 +91,8 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 							secrets[k].number = secrets[k].number + v.number
 						end
 					end
+					-- extract shared field
+					shared = shared..item:get_meta():get_string("shared")
 				elseif item_name ~= "keyring:keyring" and
 					item_name ~= "keyring:personal_keyring" then
 					-- else extract secret
@@ -107,44 +111,30 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 			elseif item_name == "keyring:personal_keyring" and not keyring_allowed then
 				keyring.log(play_name.." used a personal keyring owned by "
 					..(keyring_owner or "unknown player").." in a craft")
-					-- give it back
-					craft_inv:set_stack("craft", position, item)
-			end
-		end
-		local meta = itemstack:get_meta()
-		-- write secrets in keyring.fields.KRS
-		meta:set_string(keyring.fields.KRS, minetest.serialize(secrets))
-
-		-- write owner
-		if res_name == "keyring:personal_keyring" then
-			local is_owned = false
-			for position, item in pairs(old_craft_grid) do
-				local keyring_owner = item:get_meta():get_string("owner")
-				local keyring_allowed = (keyring_owner == nil)
-					or (keyring_owner == play_name)
-					or (keyring_owner == "")
-				local groups = item:get_definition().groups
-				if (not keyring_allowed) and groups and groups.key == 1 then
 					-- put all craft material back
 					for p, i in pairs(old_craft_grid) do
 						craft_inv:set_stack("craft", p, i)
 					end
 					-- cancel craft result
 					return ItemStack(nil)
-				elseif (not is_owned) and keyring_owner == play_name
-					and groups and groups.key == 1 then
-					is_owned = true
-				end
+			elseif (not is_owned) and item_name == "keyring:personal_keyring" and
+				keyring_owner == play_name then
+				is_owned = true
+			end
+		end
+		local meta = itemstack:get_meta()
+		-- write secrets in keyring.fields.KRS
+		meta:set_string(keyring.fields.KRS, minetest.serialize(secrets))
 
-			end
-			-- if exit loop then craft is allowed
-			if is_owned then
-				meta:set_string("description",
-					ItemStack("keyring:personal_keyring"):get_description()
-					.." "..S("(owned by @1)", play_name))
-				meta:set_string("owner", play_name)
-			end
-			--TODO: copy shared field
+		-- write shared
+		meta:set_string("shared", shared)
+
+		-- write owner
+		if is_owned then
+			meta:set_string("description",
+				ItemStack("keyring:personal_keyring"):get_description()
+				.." "..S("(owned by @1)", play_name))
+			meta:set_string("owner", play_name)
 		end
 		return itemstack
 	end
