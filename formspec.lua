@@ -6,7 +6,6 @@ local F = minetest.formspec_escape
 local context = {}
 local selected = {}
 local key_list = {}
-local player_shared_list = {}
 local tab = {}
 local function reset_context(name)
 	context[name] = nil
@@ -75,7 +74,8 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		-- make owner
 		if fields.make_private or fields.make_public then
 			if not keyring_allowed then
-				minetest.chat_send_player(name, S("You are not allowed to edit settings of this keyring."))
+				minetest.chat_send_player(name,
+					S("You are not allowed to edit settings of this keyring."))
 				return
 			end
 			if fields.make_private  then
@@ -228,7 +228,6 @@ keyring.formspec = function(itemstack, player)
 	local keyring_type = itemstack:get_name()
 	local krs = itemstack:get_meta():get_string(keyring.fields.KRS)
 	-- formspec
-	local vertical_shift = false
 	local formspec = "formspec_version[3]"
 		.."size[10.75,11.25]"
 	if keyring_type == "keyring:personal_keyring" then
