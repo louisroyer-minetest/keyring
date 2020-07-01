@@ -15,147 +15,149 @@ end)
 
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
-	if formname == "keyring:edit" or formname == "keyring:share" then
-		local name = player:get_player_name()
-		-- clean context
-		if fields.quit and not fields.key_enter then
-			context[name] = nil
-			selected[name] = nil
-			key_list[name] = nil
-			return
-		end
+	-- guard
+	if not formname == "keyring:edit" and not formname == "keyring:share" then
+		return
+	end
+	local name = player:get_player_name()
+	-- clean context
+	if fields.quit and not fields.key_enter then
+		context[name] = nil
+		selected[name] = nil
+		key_list[name] = nil
+		return
+	end
 
-		-- check abuses
-		local item = player:get_wielded_item()
-		local meta = item:get_meta()
-		if item:get_name() ~= "keyring:keyring"
-			and item:get_name() ~= "keyring:personal_keyring" then
-			keyring.log("Player "..name..
-				" sent a keyring action but has no keyring in hand.")
-			return
-		end
-		local krs = meta:get_string(keyring.fields.KRS)
-		if krs ~= context[name] then
-			keyring.log("Player "..name
-				.." sent a keyring action but has not the right keyring in hand.")
-			return
-		end
+	-- check abuses
+	local item = player:get_wielded_item()
+	local meta = item:get_meta()
+	if item:get_name() ~= "keyring:keyring"
+		and item:get_name() ~= "keyring:personal_keyring" then
+		keyring.log("Player "..name..
+			" sent a keyring action but has no keyring in hand.")
+		return
+	end
+	local krs = meta:get_string(keyring.fields.KRS)
+	if krs ~= context[name] then
+		keyring.log("Player "..name
+			.." sent a keyring action but has not the right keyring in hand.")
+		return
+	end
 
-		local keyring_owner = meta:get_string("owner")
-		local keyring_allowed = (keyring_owner == nil)
-			or (keyring_owner == name) or (keyring_owner == "")
-		if not keyring_allowed then
-			if (not minetest.check_player_privs(name, { keyring_inspect=true }))
-				and not (" "..meta:get_string("shared").." "):find(" "..name.." ") then
-				keyring.log(player:get_player_name()
-					.." sent command to manage keys of a keyring owned by "
-					..(keyring_owner or "unknown player"))
-			end
-			return
+	local keyring_owner = meta:get_string("owner")
+	local keyring_allowed = keyring.fields.utils.owner.is_edit_allowed(keyring_owner, name)
+	if not keyring_allowed then
+		if (not minetest.check_player_privs(name, { keyring_inspect=true }))
+			and not (" "..meta:get_string(
+			keyring.fields.shared).." "):find(" "..name.." ") then
+			keyring.log(player:get_player_name()
+				.." sent command to manage keys of a keyring owned by "
+				..(keyring_owner or "unknown player"))
 		end
+		return
+	end
 
-		if formname == "keyring:edit" then
-			if item:get_name() == "keyring:personal_keyring" then
-				-- make owner
-				if fields.make_private ~= nil then
-					if fields.make_private == "true" then
-						meta:set_string("owner", name)
-						meta:set_string("description",
-							ItemStack("keyring:personal_keyring"):get_description()
-							.." "..S("(owned by @1)", name))
-					elseif fields.make_private == "false" then
-						meta:set_string("owner", "")
-						meta:set_string("description",
-							ItemStack("keyring:personal_keyring"):get_description())
-					end
-					player:set_wielded_item(item)
-					keyring.formspec(item, minetest.get_player_by_name(name))
+	if formname == "keyring:edit" then
+		if item:get_name() == "keyring:personal_keyring" then
+			-- make owner
+			if fields.make_private ~= nil then
+				if fields.make_private == "true" then
+					meta:set_string("owner", name)
+					meta:set_string("description",
+						ItemStack("keyring:personal_keyring"):get_description()
+						.." "..S("(owned by @1)", name))
+				elseif fields.make_private == "false" then
+					meta:set_string("owner", "")
+					meta:set_string("description",
+						ItemStack("keyring:personal_keyring"):get_description())
 				end
-				-- share keyring
-				if fields.edit_share then
-					minetest.close_formspec(name, "keyring:edit")
-					keyring.formspec_share(item, minetest.get_player_by_name(name))
-				end
+				player:set_wielded_item(item)
+				keyring.formspec(item, minetest.get_player_by_name(name))
 			end
-
-			-- key selection
-			if fields.selected_key ~= nil then
-				local event = minetest.explode_textlist_event(fields.selected_key)
-				if event.type ~= "INV" then
-					if key_list[name] == nil or event.index > #key_list[name] then
-						keyring.log("Player "..name
-							.." selected a key in keyring interface"
-							.." but this key does not exist.")
-						return
-					end
-					selected[name] = event.index
-				end
+			-- share keyring
+			if fields.edit_share then
+				minetest.close_formspec(name, "keyring:edit")
+				keyring.formspec_share(item, minetest.get_player_by_name(name))
 			end
+		end
 
-			if selected[name] then
-				-- no name provided for renaming
-				if (fields.rename or (fields.key_enter and fields.key_enter_field
-					and fields.key_enter_field == "new_name"))
-					and ((not fields.new_name) or fields.new_name == "") then
-					minetest.chat_send_player(name, S("You must enter a name first."))
+		-- key selection
+		if fields.selected_key ~= nil then
+			local event = minetest.explode_textlist_event(fields.selected_key)
+			if event.type ~= "INV" then
+				if key_list[name] == nil or event.index > #key_list[name] then
+					keyring.log("Player "..name
+						.." selected a key in keyring interface"
+						.." but this key does not exist.")
 					return
 				end
-				-- add user description
-				if (fields.rename or (fields.key_enter and fields.key_enter_field
-					and fields.key_enter_field == "new_name"))
-					and key_list[name] and selected[name] and selected[name] <= #key_list[name]
-					and fields.new_name and fields.new_name ~= "" and selected[name] then
-					local u_krs = minetest.deserialize(krs)
-					u_krs[key_list[name][selected[name]]].user_description = fields.new_name
-					meta:set_string(keyring.fields.KRS, minetest.serialize(u_krs))
-					player:set_wielded_item(item)
-					keyring.formspec(item, minetest.get_player_by_name(name))
-					return
-				end
-				-- put the key out of keyring
-				if fields.remove and selected[name] and key_list[name] and selected[name]
-					and selected[name] <= #key_list[name] then
-					local key = ItemStack("default:key")
-					local u_krs = minetest.deserialize(krs)
-					local key_meta = key:get_meta()
-					key_meta:set_string("secret", selected[name])
-					key_meta:set_string(keyring.fields.description,
-						u_krs[key_list[name][selected[name]]].user_description)
-					key_meta:set_string("description",
-						u_krs[key_list[name][selected[name]]].description)
-					local inv = minetest.get_player_by_name(name):get_inventory()
-					if inv:room_for_item("main", key) then
-						-- remove key from keyring
-						local number = u_krs[key_list[name][selected[name]]].number
-						if number > 1 then
-							-- remove only 1 key
-							u_krs[key_list[name][selected[name]]].number = number -1
-						else
-							u_krs[key_list[name][selected[name]]] = nil
-						end
-						-- apply
-						item:get_meta():set_string(keyring.fields.KRS, minetest.serialize(u_krs))
-						player:set_wielded_item(item)
-						keyring.formspec(item, minetest.get_player_by_name(name))
-
-						-- add key to inventory
-						inv:add_item("main", key)
-					else
-						minetest.chat_send_player(name,
-							S("There is no room in your inventory for a key."))
-					end
-					return
-				end
+				selected[name] = event.index
 			end
-			-- no selected key, but removing/renaming asked
-			if (fields.rename or fields.remove or (fields.key_enter and fields.key_enter_field
-				and fields.key_enter_field == "new_name")) and not selected[name] then
-				minetest.chat_send_player(name, S("You must select a key first."))
+		end
+
+		if selected[name] then
+			-- no name provided for renaming
+			if (fields.rename or (fields.key_enter and fields.key_enter_field
+				and fields.key_enter_field == "new_name"))
+				and ((not fields.new_name) or fields.new_name == "") then
+				minetest.chat_send_player(name, S("You must enter a name first."))
 				return
 			end
-		elseif formname == "keyring:share" then
+			-- add user description
+			if (fields.rename or (fields.key_enter and fields.key_enter_field
+				and fields.key_enter_field == "new_name"))
+				and key_list[name] and selected[name] and selected[name] <= #key_list[name]
+				and fields.new_name and fields.new_name ~= "" and selected[name] then
+				local u_krs = minetest.deserialize(krs)
+				u_krs[key_list[name][selected[name]]].user_description = fields.new_name
+				meta:set_string(keyring.fields.KRS, minetest.serialize(u_krs))
+				player:set_wielded_item(item)
+				keyring.formspec(item, minetest.get_player_by_name(name))
+				return
+			end
+			-- put the key out of keyring
+			if fields.remove and selected[name] and key_list[name] and selected[name]
+				and selected[name] <= #key_list[name] then
+				local key = ItemStack("default:key")
+				local u_krs = minetest.deserialize(krs)
+				local key_meta = key:get_meta()
+				key_meta:set_string("secret", selected[name])
+				key_meta:set_string(keyring.fields.description,
+					u_krs[key_list[name][selected[name]]].user_description)
+				key_meta:set_string("description",
+					u_krs[key_list[name][selected[name]]].description)
+				local inv = minetest.get_player_by_name(name):get_inventory()
+				if inv:room_for_item("main", key) then
+					-- remove key from keyring
+					local number = u_krs[key_list[name][selected[name]]].number
+					if number > 1 then
+						-- remove only 1 key
+						u_krs[key_list[name][selected[name]]].number = number -1
+					else
+						u_krs[key_list[name][selected[name]]] = nil
+					end
+					-- apply
+					item:get_meta():set_string(keyring.fields.KRS, minetest.serialize(u_krs))
+					player:set_wielded_item(item)
+					keyring.formspec(item, minetest.get_player_by_name(name))
+
+					-- add key to inventory
+					inv:add_item("main", key)
+				else
+					minetest.chat_send_player(name, S("There is no room in your inventory for a key."))
+				end
+				return
+			end
+		end
+		-- no selected key, but removing/renaming asked
+		if (fields.rename or fields.remove or (fields.key_enter and fields.key_enter_field
+			and fields.key_enter_field == "new_name")) and not selected[name] then
+			minetest.chat_send_player(name, S("You must select a key first."))
 			return
 		end
+	elseif formname == "keyring:share" then
+		--TODO
+		return
 	end
 end)
 
@@ -192,12 +194,11 @@ end
 keyring.formspec = function(itemstack, player)
 	local name = player:get_player_name()
 	local keyring_owner = itemstack:get_meta():get_string("owner")
-	local keyring_allowed = (keyring_owner == nil)
-		or (keyring_owner == player:get_player_name())
-		or (keyring_owner == "")
+	local keyring_allowed = keyring.fields.utils.owner.is_edit_allowed(keyring_owner,
+		name)
 	local has_list_priv = minetest.check_player_privs(name, { keyring_inspect=true })
 	local is_shared_with = (" "..itemstack:get_meta():get_string(
-		"shared").." "):find(" "..name.." ") and true
+		keyring.fields.shared).." "):find(" "..name.." ") and true
 	if not (keyring_allowed or has_list_priv or is_shared_with) then
 		keyring.log(player:get_player_name()
 			.." tryed to access key management of a keyring owned by "
