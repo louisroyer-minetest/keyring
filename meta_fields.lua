@@ -44,9 +44,9 @@ end
 --
 --[[ True if player is allowed to edit keyring
 --]]
-keyring.fields.utils.owner.is_edit_allowed = function(keyring_owner, player)
+keyring.fields.utils.owner.is_edit_allowed = function(keyring_owner, player_name)
 	return (keyring_owner == nil)
-	or (keyring_owner == play_name)
+	or (keyring_owner == player_name)
 	or (keyring_owner == "")
 end
 
