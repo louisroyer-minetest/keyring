@@ -286,10 +286,11 @@ local function get_player_list_connected(player_list, name)
 		if (v_name ~= name) and
 			not keyring.fields.utils.shared.is_shared_with(v_name, player_list) then
 			if not first then
-				res_list = res_list..v_name..","
+				res_list = res_list..","
 			else
 				first = false
 			end
+			res_list = res_list..v_name
 		end
 	end
 	return res_list
