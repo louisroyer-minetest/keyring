@@ -39,6 +39,7 @@ Make public=
 Remove key=
 Rename key=
 Share=
+There is no key in the keyring.=
 There is no room in your inventory for a key.=
 This keyring is not shared.=
 This keyring is owned by @1.=

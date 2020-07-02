@@ -39,6 +39,7 @@ Make public=Rendre public
 Remove key=Retirer la clé
 Rename key=Renommer la clé
 Share=Partager
+There is no key in the keyring.=Il n’y a pas de clé dans ce trousseau.
 There is no room in your inventory for a key.=Il n’y a pas de place dans votre inventaire pour une clé.
 This keyring is not shared.=Ce trousseau n’est pas partagé.
 This keyring is owned by @1.=Ce trousseau appartient à @1.

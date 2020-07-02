@@ -371,22 +371,27 @@ keyring.formspec = function(itemstack, player)
 				.."button[1,10;5,1;unshare;"..F(S("Unshare")).."]"
 		end
 	else
-		formspec = formspec
-			-- header label
-			.."label[1,1;"..F(S("List of keys in the keyring")).."]"
-			-- list of keys
-			.."textlist[1,1.75;8.75,"
-			..( -- space for rename button
-				(keyring_type == "keyring:personal_keyring" and not keyring_allowed)
-				and "8" or "7"
-			)
-		formspec = formspec..";selected_key;"..get_key_list(krs, name).."]"
-		if keyring_allowed or (keyring_type ~= "keyring:personal_keyring") then
-			-- rename button
-			formspec = formspec.."button[1,9;5,1;rename;"..F(S("Rename key")).."]"
-				.."field[6.5,9;3.25,1;new_name;;]"
-				.."field_close_on_enter[new_name;false]"
-				.."button[1,10;5,1;remove;"..F(S("Remove key")).."]"
+		local has_keys = next(minetest.deserialize(krs) or {}) ~= nil
+		if has_keys then
+			formspec = formspec
+				-- header label
+				.."label[1,1;"..F(S("List of keys in the keyring")).."]"
+				-- list of keys
+				.."textlist[1,1.75;8.75,"
+				..( -- space for rename button
+					(keyring_type == "keyring:personal_keyring" and not keyring_allowed)
+					and "8" or "7"
+				)
+			formspec = formspec..";selected_key;"..get_key_list(krs, name).."]"
+			if keyring_allowed or (keyring_type ~= "keyring:personal_keyring") then
+				-- rename button
+				formspec = formspec.."button[1,9;5,1;rename;"..F(S("Rename key")).."]"
+					.."field[6.5,9;3.25,1;new_name;;]"
+					.."field_close_on_enter[new_name;false]"
+					.."button[1,10;5,1;remove;"..F(S("Remove key")).."]"
+			end
+		else
+			formspec = formspec.."label[1,1;"..F(S("There is no key in the keyring.")).."]"
 		end
 	end
 	formspec = formspec.."button_exit[6.5,10;3.25,1;exit;"..F(S("Exit")).."]"
