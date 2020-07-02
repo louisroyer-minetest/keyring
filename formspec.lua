@@ -109,7 +109,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 				keyring.formspec(item, minetest.get_player_by_name(name))
 			end
 			if (fields.share_player_button or (fields.key_enter and fields.key_enter_field
-				and fields.key_enter_field == "share_player")) and fields.share_player 
+				and fields.key_enter_field == "share_player")) and fields.share_player
 				and fields.share_player ~= "" then
 				meta:set_string(keyring.fields.shared, shared..
 					((shared ~="") and " " or "")..fields.share_player)

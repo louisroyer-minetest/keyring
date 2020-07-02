@@ -95,11 +95,9 @@ keyring.fields.utils.shared.get_from_index = function(index, list)
 	if index <= 0 then
 		return ""
 	end
-	local first = true
 	local last_space
 	local next_space = 1
 	local i = 0
-	local len = list:len()
 	repeat
 		last_space = next_space
 		next_space = list:find(" ", last_space + 1, true)
@@ -108,5 +106,6 @@ keyring.fields.utils.shared.get_from_index = function(index, list)
 	if i < index then
 		return ""
 	end
-	return list:sub(last_space == 1 and last_space or last_space +1, next_space and next_space -1 or nil )
+	return list:sub(last_space == 1 and last_space or last_space +1,
+		next_space and next_space -1 or nil )
 end
