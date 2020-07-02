@@ -52,6 +52,20 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		return
 	end
 
+	-- edits rights not required for this section
+	if item:get_name() == "keyring:personal_keyring" then
+		-- tabheader selection
+		if fields.header == "2" then
+			tab[name] = true
+		elseif fields.header == "1" then
+			tab[name] = nil
+		end
+		if fields.header then
+			keyring.formspec(item, minetest.get_player_by_name(name))
+		end
+	end
+
+	-- check for edits
 	local keyring_owner = meta:get_string("owner")
 	local shared = meta:get_string(keyring.fields.shared)
 	local keyring_allowed = keyring.fields.utils.owner.is_edit_allowed(keyring_owner, name)
@@ -66,15 +80,6 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	end
 
 	if item:get_name() == "keyring:personal_keyring" then
-		-- tabheader selection
-		if fields.header == "2" then
-			tab[name] = true
-		elseif fields.header == "1" then
-			tab[name] = nil
-		end
-		if fields.header then
-			keyring.formspec(item, minetest.get_player_by_name(name))
-		end
 		-- make owner
 		if fields.make_private or fields.make_public then
 			if not keyring_allowed then
