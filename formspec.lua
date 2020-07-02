@@ -111,9 +111,13 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			if (fields.share_player_button or (fields.key_enter and fields.key_enter_field
 				and fields.key_enter_field == "share_player")) and fields.share_player
 				and fields.share_player ~= "" then
+				local concat = fields.share_player
+				for _, v in ipairs({"%[", "]", ",", ";", "\\"}) do
+					concat = concat:gsub(v," ")
+				end
 				meta:set_string(keyring.fields.shared, shared..
-					((shared ~="") and " " or "")..fields.share_player)
-				player:set_wielded_item(item)
+					((shared ~="") and " " or "")..concat)
+					player:set_wielded_item(item)
 				keyring.formspec(item, minetest.get_player_by_name(name))
 			end
 			if fields.unshare and selected_player[name]

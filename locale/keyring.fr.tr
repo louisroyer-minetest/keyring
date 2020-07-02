@@ -55,8 +55,3 @@ You own this keyring.=Ce trousseau vous appartient.
 ### privileges.lua ###
 
 Can list keys of private keyrings owned by other players=Permettre de lister les clés d’un trousseau privé qui appartient à d’autres joueurs
-
-
-##### not used anymore #####
-
-Make this keyring private=Rendre ce trousseau privé
