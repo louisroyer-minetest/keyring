@@ -76,10 +76,10 @@ minetest.register_on_player_inventory_action(
 		for pos, item in ipairs(player_inv:get_list("main")) do
 			local meta = item:get_meta()
 			local owner = meta:get_string("owner")
-			local shared = (" "..meta:get_string(
-				keyring.fields.shared).." "):find(" "..player_name.." ") and true
+			local shared = meta:get_string(keyring.fields.shared)
+			local shared_with = keyring.fields.utils.shared.is_shared_with(player_name, shared)
 			if owner and owner ~= "" and owner ~= player_name
-				and not shared then
+				and not shared_with then
 				meta:set_string("secret", "")
 			end
 			player_inv:set_stack("main", pos, item)

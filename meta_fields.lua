@@ -22,6 +22,7 @@ keyring.fields = {utils = {}}
 keyring.fields.KRS = "_keyring_registered_secrets"
 keyring.fields.utils.KRS = {}
 keyring.fields.utils.owner = {}
+keyring.fields.utils.shared = {}
 
 --[[ Returns true if secret is in the secrets_list.
 --]]
@@ -60,3 +61,52 @@ keyring.fields.description = "_keyring_user_description"
 -- format: usernames separated with spaces
 --]]
 keyring.fields.shared = "_keyring_shared"
+
+--[[ True if list said the keyring is shared with this player
+--]]
+keyring.fields.utils.shared.is_shared_with = function(playername, list)
+	return (" "..list.." "):find(" "..playername.." ", 1, true) and true or false
+end
+
+--[[ Remove name from shared list
+--]]
+keyring.fields.utils.shared.remove = function(playername, list)
+	-- cannot use directly gsub because there is a risk of user injection
+	local l = " "..list.." "
+	local s_start, s_end = (l):find(" "..playername.." ", 1, true)
+	if s_start == nil then
+		return list
+	end
+	if s_start == 1 and s_end == l:len() then
+		return ""
+	end
+	if s_start == 1 then
+		return l:sub(s_end+1, -2)
+	end
+	if s_end == l:len() then
+		return l:sub(2, s_start-1)
+	end
+	return l:sub(2, s_start-1).." "..l:sub(s_end+1, -2)
+end
+
+--[[ Get playername from list and index
+--]]
+keyring.fields.utils.shared.get_from_index = function(index, list)
+	if index <= 0 then
+		return ""
+	end
+	local first = true
+	local last_space
+	local next_space = 1
+	local i = 0
+	local len = list:len()
+	repeat
+		last_space = next_space
+		next_space = list:find(" ", last_space + 1, true)
+		i = i + 1
+	until ((i >= index) or next_space == nil)
+	if i < index then
+		return ""
+	end
+	return list:sub(last_space == 1 and last_space or last_space +1, next_space and next_space -1 or nil )
+end

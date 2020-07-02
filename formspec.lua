@@ -5,11 +5,15 @@ local F = minetest.formspec_escape
 -- context
 local context = {}
 local selected = {}
+local selected_player = {}
+local selected_player_num = {}
 local key_list = {}
 local tab = {}
 local function reset_context(name)
 	context[name] = nil
 	selected[name] = nil
+	selected_player[name] = nil
+	selected_player_num[name] = nil
 	key_list[name] = nil
 	tab[name] = nil
 end
@@ -49,11 +53,11 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	end
 
 	local keyring_owner = meta:get_string("owner")
+	local shared = meta:get_string(keyring.fields.shared)
 	local keyring_allowed = keyring.fields.utils.owner.is_edit_allowed(keyring_owner, name)
 	if not keyring_allowed then
-		if (not minetest.check_player_privs(name, { keyring_inspect=true }))
-			and not (" "..meta:get_string(
-			keyring.fields.shared).." "):find(" "..name.." ") then
+		if (not minetest.check_player_privs(name, { keyring_inspect=true })) and
+			not keyring.fields.utils.shared.is_shared_with(name, shared) then
 			keyring.log(player:get_player_name()
 				.." sent command to manage keys of a keyring owned by "
 				..(keyring_owner or "unknown player"))
@@ -90,6 +94,63 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			end
 			player:set_wielded_item(item)
 			keyring.formspec(item, minetest.get_player_by_name(name))
+		end
+		if fields.share_player_dropdown and fields.player_dropdown
+			and fields.player_dropdown ~= "" then
+			meta:set_string(keyring.fields.shared, shared..
+				((shared ~="") and " " or "")..fields.player_dropdown)
+			player:set_wielded_item(item)
+			keyring.formspec(item, minetest.get_player_by_name(name))
+		end
+		if (fields.share_player_button or (fields.key_enter and fields.key_enter_field
+			and fields.key_enter_field == "share_player")) and fields.share_player 
+			and fields.share_player ~= "" then
+			meta:set_string(keyring.fields.shared, shared..
+				((shared ~="") and " " or "")..fields.share_player)
+			player:set_wielded_item(item)
+			keyring.formspec(item, minetest.get_player_by_name(name))
+		end
+		if fields.unshare and selected_player[name]
+			and selected_player[name] ~= "" then
+			shared = keyring.fields.utils.shared.remove(selected_player[name], shared)
+			if keyring.fields.utils.shared.get_from_index(
+				selected_player_num[name], shared) == "" then
+				selected_player_num[name] = selected_player_num[name] -1
+			end
+			selected_player[name] = keyring.fields.utils.shared.get_from_index(
+				selected_player_num[name], shared)
+			meta:set_string(keyring.fields.shared, shared)
+			player:set_wielded_item(item)
+			keyring.formspec(item, minetest.get_player_by_name(name))
+		end
+
+		-- refresh selected player
+		if fields.selected_player then
+			local event = minetest.explode_textlist_event(fields.selected_player)
+			if event.type ~= "INV" then
+				selected_player[name] = keyring.fields.utils.shared.get_from_index(
+					event.index, shared)
+				if selected_player[name] == "" then
+					keyring.log("Player "..name
+						.." selected a player in keyring settings interface"
+						.." but this player is not in the list.")
+				else
+					selected_player_num[name] = event.index
+				end
+			end
+		end
+
+		-- warn player
+		if (fields.share_player_button or (fields.key_enter and fields.key_enter_field
+			and fields.key_enter_field == "share_player")) and ((not fields.share_player)
+			or fields.share_player == "") then
+			minetest.chat_send_player(name, S("You must enter a player name first."))
+		end
+		if (fields.unshare and ((not selected_player[name])
+			or selected_player[name] == ""))
+			or (fields.share_player_dropdown and ((not fields.player_dropdown)
+			or fields.player_dropdown == "")) then
+			minetest.chat_send_player(name, S("You must select a player first."))
 		end
 	end
 
@@ -173,7 +234,7 @@ end)
 -- parameter: serialized krs and player name
 -- return: key list
 --]]
-function get_key_list(serialized_krs, name)
+local function get_key_list(serialized_krs, name)
 	local krs = minetest.deserialize(serialized_krs) or {}
 	local list = ""
 	local first = true
@@ -199,11 +260,32 @@ end
 -- parameter: list of players separated by space, player name
 -- return: return player list separated by comma
 -- ]]
-function get_player_shared_list(player_list, name)
+local function get_player_shared_list(player_list, name)
 	if player_list == "" or player_list == nil then
 		return ""
 	end
-	return string:gsub(player_list, "%s+", ", ")
+	return player_list:gsub("%s+", ",")
+end
+
+--[[ Get connected players list (not already in shared)
+-- parameter: list of players separated by space, player name
+--]]
+local function get_player_list_connected(player_list, name)
+	local list = minetest.get_connected_players()
+	local res_list = ""
+	local first = true
+	for _, v in pairs(list) do
+		local v_name = v:get_player_name()
+		if (v_name ~= name) and
+			not keyring.fields.utils.shared.is_shared_with(v_name, player_list) then
+			if not first then
+				res_list = v_name..","
+			else
+				first = false
+			end
+		end
+	end
+	return res_list
 end
 
 --[[
@@ -217,7 +299,7 @@ keyring.formspec = function(itemstack, player)
 		name)
 	local has_list_priv = minetest.check_player_privs(name, { keyring_inspect=true })
 	local shared = itemstack:get_meta():get_string(keyring.fields.shared)
-	local is_shared_with = (" "..shared.." "):find(" "..name.." ") and true
+	local is_shared_with = keyring.fields.utils.shared.is_shared_with(name, shared)
 	if not (keyring_allowed or has_list_priv or is_shared_with) then
 		keyring.log(player:get_player_name()
 			.." tryed to access key management of a keyring owned by "
@@ -261,15 +343,21 @@ keyring.formspec = function(itemstack, player)
 			formspec = formspec.."label[1,"..(protected and "2" or "3")
 				..";"..F(S("This keyring is not shared.")).."]"
 		end
-		if (not protected) and shared ~= nil and shared ~= "" then
-			--TODO : UNIMPLEMENTED
-			formspec = formspec.."button[1,10;5,1;unshare;"..F(S("Unshare")).."]"
+		if not protected then
+			formspec = formspec
+				-- dropdown
+				.."dropdown[1,8;5,1;player_dropdown;"
+				..get_player_list_connected(shared, name)..";0]"
+				.."button[6.5,8;3.25,1;share_player_dropdown;"..F(S("Share")).."]"
+				-- field
+				.."field[1,9;5,1;share_player;;]"
+				.."field_close_on_enter[share_player;false]"
+				.."button[6.5,9;3.25,1;share_player_button;"..F(S("Share")).."]"
 		end
-
-		--TODO
-		--
-		-- Share selector (player connected)
-		-- Share `textfield`
+		if (not protected) and shared ~= nil and shared ~= "" then
+			formspec = formspec
+				.."button[1,10;5,1;unshare;"..F(S("Unshare")).."]"
+		end
 	else
 		formspec = formspec
 			-- header label
