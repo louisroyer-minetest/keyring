@@ -31,14 +31,32 @@ Personal Keyring=Trousseau personnel
 ### formspec.lua ###
 
 Exit=Quitter
+Keyring settings=Paramètres du trousseau
+Keys management=Gestion des clés
 List of keys in the keyring=Listes des clés dans le trousseau
-Make this keyring private=Rendre ce trousseau privé
+Make private=Rendre privé
+Make public=Rendre public
 Remove key=Retirer la clé
 Rename key=Renommer la clé
+Share=Partager
 There is no room in your inventory for a key.=Il n’y a pas de place dans votre inventaire pour une clé.
+This keyring is not shared.=Ce trousseau n’est pas partagé.
+This keyring is owned by @1.=Ce trousseau appartient à @1.
+This keyring is public.=Ce trousseau est public.
+This keyring is shared with:=Ce trousseau est partagé avec :
+Unshare=Ne plus partager
+You are not allowed to edit settings of this keyring.=Vous n’êtes pas autorisé à modifier les paramètres de ce trousseau.
 You must enter a name first.=Vous devez d’abord entrer un nom.
+You must enter a player name first.=
 You must select a key first.=Vous devez d’abord sélectionner une clé.
+You must select a player first.=Vous devez d’abord sélectionner un joueur.
+You own this keyring.=Ce trousseau vous appartient.
 
 ### privileges.lua ###
 
 Can list keys of private keyrings owned by other players=Permettre de lister les clés d’un trousseau privé qui appartient à d’autres joueurs
+
+
+##### not used anymore #####
+
+Make this keyring private=Rendre ce trousseau privé

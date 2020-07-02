@@ -31,13 +31,26 @@ Personal Keyring=
 ### formspec.lua ###
 
 Exit=
+Keyring settings=
+Keys management=
 List of keys in the keyring=
-Make this keyring private=
+Make private=
+Make public=
 Remove key=
 Rename key=
+Share=
 There is no room in your inventory for a key.=
+This keyring is not shared.=
+This keyring is owned by @1.=
+This keyring is public.=
+This keyring is shared with:=
+Unshare=
+You are not allowed to edit settings of this keyring.=
 You must enter a name first.=
+You must enter a player name first.=
 You must select a key first.=
+You must select a player first.=
+You own this keyring.=
 
 ### privileges.lua ###
 
