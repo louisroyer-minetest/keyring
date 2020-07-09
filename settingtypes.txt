@@ -1,4 +1,1 @@
 keyring.personnal_keyring (Enable personnal keyrings) bool true
-
-[Development]
-keyring.dev.test (Enable running of development tests) bool false
