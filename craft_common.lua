@@ -21,7 +21,7 @@ keyring.craft_common.select_key = function(itemstack, placer, meta)
 		return itemstack
 	end
 	if not keyring_access then
-		keyring.log(name.." try to use personal keyring of "
+		keyring.log("action", "Player "..name.." tryed to use personal keyring of "
 			..(keyring_owner or "unkwown player"))
 		-- resetting immediatly the secret to avoid unallowed uses
 		i_meta:set_string("secret", "")
@@ -115,7 +115,7 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 				end
 			end
 		elseif item_name == "keyring:personal_keyring" and not keyring_allowed then
-			keyring.log(play_name.." used a personal keyring owned by "
+			keyring.log("action", "Player "..play_name.." used a personal keyring owned by "
 				..(keyring_owner or "unknown player").." in a craft")
 				-- put all craft material back
 				for p, i in pairs(old_craft_grid) do

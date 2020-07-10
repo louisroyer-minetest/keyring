@@ -41,13 +41,13 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	local meta = item:get_meta()
 	if item:get_name() ~= "keyring:keyring"
 		and item:get_name() ~= "keyring:personal_keyring" then
-		keyring.log("Player "..name..
+		keyring.log("action", "Player "..name..
 			" sent a keyring action but has no keyring in hand.")
 		return
 	end
 	local krs = meta:get_string(keyring.fields.KRS)
 	if krs ~= context[name] then
-		keyring.log("Player "..name
+		keyring.log("action", "Player "..name
 			.." sent a keyring action but has not the right keyring in hand.")
 		return
 	end
@@ -72,7 +72,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	if not keyring_allowed then
 		if (not minetest.check_player_privs(name, { keyring_inspect=true })) and
 			not keyring.fields.utils.shared.is_shared_with(name, shared) then
-			keyring.log(player:get_player_name()
+			keyring.log("action", "Player "..name
 				.." sent command to manage keys of a keyring owned by "
 				..(keyring_owner or "unknown player"))
 		end
@@ -141,7 +141,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 					selected_player[name] = keyring.fields.utils.shared.get_from_index(
 						event.index, shared)
 					if selected_player[name] == "" then
-						keyring.log("Player "..name
+						keyring.log("action", "Player "..name
 							.." selected a player in keyring settings interface"
 							.." but this player is not in the list.")
 					else
@@ -170,7 +170,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		local event = minetest.explode_textlist_event(fields.selected_key)
 		if event.type ~= "INV" then
 			if key_list[name] == nil or event.index > #key_list[name] then
-				keyring.log("Player "..name
+				keyring.log("action", "Player "..name
 					.." selected a key in keyring interface"
 					.." but this key does not exist.")
 				return
@@ -313,7 +313,7 @@ keyring.formspec = function(itemstack, player)
 	local shared = itemstack:get_meta():get_string(keyring.fields.shared)
 	local is_shared_with = keyring.fields.utils.shared.is_shared_with(name, shared)
 	if not (keyring_allowed or has_list_priv or is_shared_with) then
-		keyring.log(player:get_player_name()
+		keyring.log("action", "Player "..name
 			.." tryed to access key management of a keyring owned by "
 			..(keyring_owner or "unknown player"))
 		minetest.chat_send_player(name, S("You are not allowed to use this keyring."))
