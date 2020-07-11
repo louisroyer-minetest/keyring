@@ -31,9 +31,12 @@ In both crafts, keys (or `group:key`) items will be added to the resulting keyri
 - `basic_materials:padlock`
 
 ### Add a key to the keyring (shapeless)
-- `group:key` (`default:key` or `keyring:keyring`)
+- `group:key` (`default:key` or `keyring:keyring`/`keyring:personal_keyring`)
 - `keyring:keyring`/`keyring:personal_keyring`
 
+Notes:
+- if you use a personal keyring in the craft, then it must belong to you to, else the craft will be forbidden.
+- when merging two keyrings, an empty keyring will be returned back
 
 ## Dependencies
 - [basic_materials](https://gitlab.com/VanessaE/basic_materials)
