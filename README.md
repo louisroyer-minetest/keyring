@@ -8,19 +8,17 @@ Personal keyrings are a variant of keyrings allowing to set access and configura
 
 ## Craft
 ### Keyring
-- wire: `basic_materials:gold_wire`/`basic_materials:copper_wire`/`basic_materials:steel_wire`
-- key: `default:key`
 ```text
-empty  wire  empty
-wire   key   wire
-empty  wire  empty
+empty        group:wire    empty
+group:wire   default:key   group:wire
+empty        group:wire    empty
 ```
 
 or
 ```text
-group:key wire   group:key
-wire      empty  wire
-group:key wire   group:key
+group:key    group:wire   group:key
+group:wire   empty        group:wire
+group:key    group:wire   group:key
 ```
 
 This gives back 4 `basic_materials:empty_spool`.

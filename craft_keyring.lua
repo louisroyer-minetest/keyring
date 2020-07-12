@@ -33,46 +33,38 @@ minetest.register_craftitem("keyring:keyring", {
 		.."Some crafts let you add keys to the keyring."),
 })
 
--- list of wires since there is currently no group:wire in basic_materials
-local wires = {
-	"basic_materials:gold_wire",
-	"basic_materials:copper_wire",
-	"basic_materials:steel_wire"
-}
 
-for _, wire in pairs(wires) do
-	-- craft with wire
-	minetest.register_craft({
-		output = "keyring:keyring",
-		recipe = {
-			{ "",   wire,            "" },
-			{ wire, "default:key", wire },
-			{ "",   wire,            "" },
-		},
-		replacements = {
-			{ wire, "basic_materials:empty_spool" },
-			{ wire, "basic_materials:empty_spool" },
-			{ wire, "basic_materials:empty_spool" },
-			{ wire, "basic_materials:empty_spool" }
-		},
-	})
-	-- craft with 4 group:key
-	-- to make the adding of keys in keyring easier (but at a cost)
-	minetest.register_craft({
-		output = "keyring:keyring",
-		recipe = {
-			{ "group:key", wire, "group:key" },
-			{ wire,        "",          wire },
-			{ "group:key", wire, "group:key" },
-		},
-		replacements = {
-			{ wire, "basic_materials:empty_spool" },
-			{ wire, "basic_materials:empty_spool" },
-			{ wire, "basic_materials:empty_spool" },
-			{ wire, "basic_materials:empty_spool" }
-		},
-	})
-end
+-- craft with wire
+minetest.register_craft({
+	output = "keyring:keyring",
+	recipe = {
+		{ "",   "group:wire",            "" },
+		{ "group:wire", "default:key", "group:wire" },
+		{ "",   "group:wire",            "" },
+	},
+	replacements = {
+		{ "group:wire", "basic_materials:empty_spool" },
+		{ "group:wire", "basic_materials:empty_spool" },
+		{ "group:wire", "basic_materials:empty_spool" },
+		{ "group:wire", "basic_materials:empty_spool" }
+	},
+})
+-- craft with 4 group:key
+-- to make the adding of keys in keyring easier (but at a cost)
+minetest.register_craft({
+	output = "keyring:keyring",
+	recipe = {
+		{ "group:key", "group:wire", "group:key" },
+		{ "group:wire",        "",          "group:wire" },
+		{ "group:key", "group:wire", "group:key" },
+	},
+	replacements = {
+		{ "group:wire", "basic_materials:empty_spool" },
+		{ "group:wire", "basic_materials:empty_spool" },
+		{ "group:wire", "basic_materials:empty_spool" },
+		{ "group:wire", "basic_materials:empty_spool" }
+	},
+})
 
 
 -- craft to add a key
