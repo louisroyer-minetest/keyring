@@ -16,7 +16,7 @@ minetest.register_craftitem("keyring:personal_keyring", {
 	description = S("Personal Keyring"),
 	inventory_image = "keyring_keyring.png",
 	-- mimic a key
-	groups = {key = 1},
+	groups = {key = 1, key_container = 1},
 	stack_max = 1,
 	on_place = keyring.craft_common.keyring_on_place,
 

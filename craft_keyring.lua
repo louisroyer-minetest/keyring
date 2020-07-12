@@ -5,7 +5,7 @@ minetest.register_craftitem("keyring:keyring", {
 	description = S("Keyring"),
 	inventory_image = "keyring_keyring.png",
 	-- mimic a key
-	groups = {key = 1},
+	groups = {key = 1, key_container = 1},
 	stack_max = 1,
 	on_place = keyring.craft_common.keyring_on_place,
 
@@ -38,9 +38,9 @@ minetest.register_craftitem("keyring:keyring", {
 minetest.register_craft({
 	output = "keyring:keyring",
 	recipe = {
-		{ "",   "group:wire",            "" },
-		{ "group:wire", "default:key", "group:wire" },
-		{ "",   "group:wire",            "" },
+		{ "",           "group:wire", ""           },
+		{ "group:wire", "group:key",  "group:wire" },
+		{ "",           "group:wire", ""           },
 	},
 	replacements = {
 		{ "group:wire", "basic_materials:empty_spool" },
@@ -54,9 +54,9 @@ minetest.register_craft({
 minetest.register_craft({
 	output = "keyring:keyring",
 	recipe = {
-		{ "group:key", "group:wire", "group:key" },
-		{ "group:wire",        "",          "group:wire" },
-		{ "group:key", "group:wire", "group:key" },
+		{ "group:key",  "group:wire", "group:key"  },
+		{ "group:wire", "",           "group:wire" },
+		{ "group:key",  "group:wire", "group:key"  },
 	},
 	replacements = {
 		{ "group:wire", "basic_materials:empty_spool" },

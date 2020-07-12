@@ -26,7 +26,7 @@ end)
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
 	-- guard
-	if not formname == "keyring:edit" then
+	if not (formname == "keyring:edit") then
 		return
 	end
 	local name = player:get_player_name()
