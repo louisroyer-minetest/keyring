@@ -3,7 +3,7 @@ local MP = minetest.get_modpath("keyring")
 keyring = {}
 
 -- mod information
-keyring.mod = {version = "1.1.7", author = "Louis Royer"}
+keyring.mod = {version = "1.1.8", author = "Louis Royer"}
 
 -- keyring settings
 keyring.settings =
@@ -20,6 +20,15 @@ keyring.log = function(level, text)
 	else
 		minetest.log(prefix..level)
 	end
+end
+
+if not basic_materials.mod then
+	-- If this variable is unset, then basic_materials does not provide `wire` group
+	keyring.log("error", "Please use a more recent version of"
+	.." basic_materials to be able to craft keyrings.")
+	keyring.log("error", "Get latest version of basic_materials: "
+	.."https://gitlab.com/VanessaE/basic_materials"
+	.."/-/archive/master/basic_materials-master.zip")
 end
 
 dofile(MP.."/privileges.lua")
