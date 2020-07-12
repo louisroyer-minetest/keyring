@@ -10,7 +10,7 @@ Personal keyrings are a variant of keyrings allowing to set access and configura
 ### Keyring
 ```text
 empty        group:wire    empty
-group:wire   group:key   group:wire
+group:wire   group:key     group:wire
 empty        group:wire    empty
 ```
 
