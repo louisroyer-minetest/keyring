@@ -43,7 +43,10 @@ minetest.register_craft({
 		{ "",           "group:wire", ""           },
 	},
 	replacements = {
-		{ "group:wire", "basic_materials:empty_spool 4" },
+		{ "group:wire", "basic_materials:empty_spool" },
+		{ "group:wire", "basic_materials:empty_spool" },
+		{ "group:wire", "basic_materials:empty_spool" },
+		{ "group:wire", "basic_materials:empty_spool" },
 	},
 })
 -- craft with 4 group:key
@@ -56,7 +59,10 @@ minetest.register_craft({
 		{ "group:key",  "group:wire", "group:key"  },
 	},
 	replacements = {
-		{ "group:wire", "basic_materials:empty_spool 4" },
+		{ "group:wire", "basic_materials:empty_spool" },
+		{ "group:wire", "basic_materials:empty_spool" },
+		{ "group:wire", "basic_materials:empty_spool" },
+		{ "group:wire", "basic_materials:empty_spool" },
 	},
 })
 
