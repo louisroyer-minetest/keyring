@@ -62,6 +62,161 @@ keyring.craft_common.keyring_on_place = function(itemstack, placer, pointed_thin
 	return key_on_place(is, placer, pointed_thing)
 end
 
+keyring.craft_common.utils = {}
+
+--[[
+-- Returns a table with properties of the craft:
+-- consumme_one: if 1 container is consummed
+-- is_owned: if at least one item is owned
+-- is_craft_forbidden: if the craft is forbidden
+-- result_name: name of the craft result
+--]]
+keyring.craft_common.utils.get_craft_properties = function(old_craft_grid, craft_result,
+	player_name)
+	local props = {
+		consumme_one = true,
+		is_owned = false,
+		is_craft_forbidden = false,
+		result_name = craft_result
+	}
+	for position, item in pairs(old_craft_grid) do
+		if (not props.consumme_one) and
+			(minetest.get_item_group(item:get_name(), "key_container") == 1) then
+			props.consumme_one = false
+		end
+		local owner = item:get_meta():get_string("owner")
+		if owner ~= "" then
+			props.is_owned = true
+			props.is_craft_forbidden = not keyring.fields.utils.owner.is_edit_allowed(owner,
+				player_name)
+			if props.is_craft_forbidden then
+				return props
+			end
+		end
+	end
+	return props
+end
+
+--[[
+-- Returns a table with properties of the item:
+-- is_key_group: true if item is in "group key"
+-- is_virtual_group: true if item is in group "virtual key"
+-- is_container_group: true if item is in group "key_container"
+-- is_owned: true if item is owned
+-- name: item name
+-- krs: if item is a key, contains the value of krs
+-- shared: if item is a key, contains the value of shared
+-- secret: if item is a key but not a container, contains the secret key
+-- u_desc: if item is a key but not a container, contains the user description
+--]]
+keyring.craft_common.utils.get_item_properties = function(item)
+	local props = {
+		krs = {},
+		shared = "",
+		secret = "",
+		u_desc = "",
+	}
+	props.name = item:get_name()
+	props.is_key_group = (minetest.get_item_group(props.name, "key") == 1)
+	props.is_virtual_group = (minetest.get_item_group(props.name, "virtual_key") == 1)
+	props.is_container_group = (minetest.get_item_group(props.name, "key_container") == 1)
+	local item_meta = item:get_meta()
+	props.is_owned = (item_meta:get_string("owner") ~= "")
+	if props.is_key_group then
+		props.krs = item_meta:get_string(keyring.fields.KRS)
+		props.shared = item_meta:get_string(keyring.fields.shared)
+		if not props.is_container_group then
+			props.secret = item_meta:get_string("secret")
+			props.u_desc = item_meta:get_string(keyring.fields.description)
+		end
+	end
+	return props
+end
+
+--[[
+-- Returns a table with
+-- secrets field (krs) to use for the new keyring
+-- shared field to use for the new keyring
+--
+-- and returns nil or the item to put back
+--]]
+keyring.craft_common.utils.add_to_keyring = function(keyring_props, craft_properties,
+		item)
+	if keyring_props == nil then
+		keyring_props = {
+			secrets = {},
+			shared = "",
+			one_consummed = false,
+		}
+	end
+	local item_props = keyring.craft_common.utils.get_item_properties(item)
+	if not (item_props.is_key_group or item_props.is_virtual_group
+		or item_props.is_container_group) then
+		return keyring_props, nil
+	end
+	if item_props.krs ~= "" then
+		-- extract keyring.fields.KRS if it exists
+		for k, v in pairs(minetest.deserialize(item_props.krs) or {}) do
+			-- add missing secrets
+			if not keyring.fields.utils.KRS.in_keyring(keyring_props.secrets, k) then
+				keyring_props.secrets[k] = v
+			else
+				keyring_props.secrets[k].number = keyring_props.secrets[k].number + v.number
+			end
+			if v.virtual or item_props.is_virtual_group then
+				keyring_props.secrets[k].virtual = true
+			end
+		end
+		-- extract shared field
+		if keyring_props.shared ~= "" then
+			-- separator
+			keyring_props.shared = keyring_props.shared.." "
+		end
+		keyring_props.shared = keyring_props.shared..item_props.shared
+	elseif (item_props.secret ~= "") and not item_props.is_container_group then
+		-- else extract secret
+		if not keyring.fields.utils.KRS.in_keyring(keyring_props.secrets,
+			item_props.secret) then
+			keyring_props.secrets[item_props.secret] = {
+				number = ((not item_props.is_virtual_group) and 1 or 0),
+				description = item:get_description(),
+				user_description = (item_props.u_desc ~= "") and item_props.u_desc or nil,
+				virtual = item_props.is_virtual_group
+			}
+		elseif item_props.is_virtual_group then
+			keyring_props.secrets[item_props.secret].virtual = true
+		else
+			keyring_props.secrets[item_props.secret].number = keyring_props
+				.secrets[item_props.secret].number + 1
+		end
+	end
+	-- give back unmodified if in group virtual_key
+	if item_props.is_virtual_group then
+		return keyring_props, item
+	end
+	-- consumme container if required
+	if (not keyring_props.one_consummed) and craft_properties.consumme_one and
+		(craft_properties.result_name == item_props.name) and
+		(craft_properties.is_owned == item_props.is_owned) then
+		keyring_props.one_consummed = true
+		return keyring_props, nil
+	end
+	-- give back other containers
+	if item_props.is_container_group then
+		-- removes non virtual keys
+		local back_krs = {}
+		for k, v in pairs(minetest.deserialize(item_props.krs) or {}) do
+			if v.virtual then
+				back_krs[k] = v
+				back_krs.number = 0
+			end
+		end
+		item:get_meta():set_string(keyring.fields.KRS, minetest.serialize(back_krs))
+		return keyring_props, item
+	end
+	return keyring_props, nil
+end
+
 
 -- add key used to craft into keyring
 minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv)
@@ -71,128 +226,38 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 		return
 	end
 	local play_name = player:get_player_name()
-	local secrets = {}
-	local is_owned = false
-	local shared = ""
-	local result_encountered = false
-	local key_item_num = 0
-	local first_key_item_position = nil
-	local contains_lock = false
+	local craft_properties = keyring.craft_common.utils.get_craft_properties(old_craft_grid,
+		res_name, play_name)
+	if craft_properties.is_craft_forbidden then
+		keyring.log("action", "Player "..play_name.." used a key owned by an other"
+			.." player in a craft")
+		-- put all craft material back
+		for p, i in pairs(old_craft_grid) do
+			craft_inv:set_stack("craft", p, i)
+		end
+		-- cancel craft result
+		return ItemStack(nil)
+	end
+	local keyring_properties = nil
 	for position, item in pairs(old_craft_grid) do
-		local item_name = item:get_name()
-		local item_meta = item:get_meta()
-		local keyring_owner = item:get_meta():get_string("owner")
-		local keyring_allowed = keyring.fields.utils.owner.is_edit_allowed(keyring_owner,
-			play_name)
-		local is_key_group = (minetest.get_item_group(item_name, "key") == 1)
-		if (not contains_lock) and item_name == "basic_materials:padlock" then
-			contains_lock = true
-		end
-		-- if item is not in key group, then there is no special handling
-		if is_key_group then
-			if first_key_item_position == nil then
-				first_key_item_position = position
-			end
-			key_item_num = key_item_num + 1
-			if keyring_allowed then
-				-- adding data from item to result
-				local krs = item_meta:get_string(keyring.fields.KRS)
-				if krs ~= "" then
-					-- extract keyring.fields.KRS if it exists
-					for k, v in pairs(minetest.deserialize(krs) or {}) do
-						-- add missing secrets
-						if not keyring.fields.utils.KRS.in_keyring(secrets, k) then
-							secrets[k] = v
-						else
-							secrets[k].number = secrets[k].number + v.number
-						end
-					end
-					-- extract shared field
-					if shared ~= "" then
-						-- separator
-						shared = shared.." "
-					end
-					shared = shared..item_meta:get_string(keyring.fields.shared)
-				elseif minetest.get_item_group(item_name, "key_container") ~= 1 then
-					-- else extract secret
-					local secret = item_meta:get_string("secret")
-					if not keyring.fields.utils.KRS.in_keyring(secrets, secret) then
-						local u_desc = item_meta:get_string(keyring.fields.description)
-						secrets[secret] = {
-							number = 1,
-							description = item:get_description(),
-							user_description = (u_desc ~= "") and u_desc or nil
-						}
-					else
-						secrets[secret].number = secrets[secret].number + 1
-					end
-				end
-				-- give back an empty keyring if it's not the resulting one
-				if result_encountered then
-					-- give back empty keyring
-					if minetest.get_item_group(item_name, "key_container") == 1 then
-						local back_item = ItemStack(item_name)
-						local bi_meta = back_item:get_meta()
-						-- set owner back
-						bi_meta:set_string("owner", item_meta:get_string("owner"))
-						-- set shared back
-						bi_meta:set_string(keyring.fields.shared,
-							item_meta:get_string(keyring.fields.shared))
-						-- set description back
-						bi_meta:set_string("description", item_meta:get_string("description"))
-						-- give back
-						craft_inv:set_stack("craft", position, back_item)
-					end
-				elseif item_name == res_name then
-					result_encountered = true
-				end
-				if (not is_owned) and keyring_owner == play_name then
-					is_owned = true
-				end
-			else
-				keyring.log("action", "Player "..play_name.." used a key owned by "
-					..(keyring_owner or "unknown player").." in a craft")
-				-- put all craft material back
-				for p, i in pairs(old_craft_grid) do
-					craft_inv:set_stack("craft", p, i)
-				end
-				-- cancel craft result
-				return ItemStack(nil)
-			end
+		local back
+		keyring_properties, back = keyring.craft_common.utils.add_to_keyring(keyring_properties,
+			craft_properties, item)
+		if back ~= nil then
+			craft_inv:set_stack("craft", position, back)
 		end
 	end
-	-- give back empty containers
-	if (not contains_lock) and (key_item_num == 1) and (first_key_item_position ~= nil) then
-		local old_item = old_craft_grid[first_key_item_position]
-		local old_name = old_item:get_name()
-		local old_meta = old_item:get_meta()
-		if minetest.get_item_group(old_name, "key_container") == 1 then
-			local back_item = ItemStack(old_name)
-			local bi_meta = back_item:get_meta()
-			-- set owner back
-			bi_meta:set_string("owner", old_meta:get_string("owner"))
-			-- set shared back
-			bi_meta:set_string(keyring.fields.shared,
-				old_meta:get_string(keyring.fields.shared))
-			-- set description back
-			bi_meta:set_string("description", old_meta:get_string("description"))
-			-- give back
-			craft_inv:set_stack("craft", first_key_item_position, back_item)
-		end
-	end
-
 	local meta = itemstack:get_meta()
 	-- write secrets in keyring.fields.KRS
-	meta:set_string(keyring.fields.KRS, minetest.serialize(secrets))
+	meta:set_string(keyring.fields.KRS, minetest.serialize(keyring_properties.secrets))
 
 	-- write shared
-	meta:set_string(keyring.fields.shared, shared)
+	meta:set_string(keyring.fields.shared, keyring_properties.shared)
 
-	-- write owner
-	if ((not contains_lock) and (key_item_num == 1) and (first_key_item_position ~= nil)) or
-		(not is_owned) then
+	if not craft_properties.is_owned then
 		return itemstack
 	end
+	-- write owner
 	meta:set_string("description",
 		ItemStack("keyring:personal_keyring"):get_description()
 		.." "..S("(owned by @1)", play_name))
@@ -207,24 +272,16 @@ minetest.register_craft_predict(function(itemstack, player, old_craft_grid, craf
 	if res_name ~= "keyring:personal_keyring" then
 		return
 	end
-	-- check if craft is allowed and if result would be owned
 	local play_name = player:get_player_name()
-	local is_owned = false
-	for position, item in pairs(old_craft_grid) do
-		local keyring_owner = item:get_meta():get_string("owner")
-		local keyring_allowed = keyring.fields.utils.owner.is_edit_allowed(keyring_owner,
-			play_name)
-		local is_group_key = (minetest.get_item_group(item:get_name(), "key") == 1)
-		if (not keyring_allowed) and is_group_key then
-			return ItemStack(nil)
-		elseif (not is_owned) and keyring_owner == play_name and is_group_key then
-			is_owned = true
-		end
+	local craft_properties = keyring.craft_common.utils.get_craft_properties(old_craft_grid,
+		res_name, play_name)
+	if craft_properties.is_craft_forbidden then
+		return ItemStack(nil)
 	end
-	-- if exit loop then craft is allowed
-	if not is_owned then
-		return itemstack
+	if not craft_properties.is_owned then
+		return
 	end
+	-- showing the right description
 	local meta = itemstack:get_meta()
 	meta:set_string("description",
 		ItemStack("keyring:personal_keyring"):get_description()

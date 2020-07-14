@@ -211,13 +211,14 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			key_meta:set_string("description",
 				u_krs[key_list[name][selected[name]]].description)
 			local inv = minetest.get_player_by_name(name):get_inventory()
-			if inv:room_for_item("main", key) then
+			local number = u_krs[key_list[name][selected[name]]].number
+			local virtual = u_krs[key_list[name][selected[name]]].virtual
+			if inv:room_for_item("main", key) or ((number == 0) and virtual) then
 				-- remove key from keyring
-				local number = u_krs[key_list[name][selected[name]]].number
-				if number > 1 then
+				if (number > 1) or (number == 1 and virtual) then
 					-- remove only 1 key
 					u_krs[key_list[name][selected[name]]].number = number -1
-				else
+				elseif (number == 1) or ((number == 0) and virtual) then
 					u_krs[key_list[name][selected[name]]] = nil
 				end
 				-- apply
@@ -225,8 +226,10 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 				player:set_wielded_item(item)
 				keyring.formspec(item, minetest.get_player_by_name(name))
 
-				-- add key to inventory
-				inv:add_item("main", key)
+				if not (number == 0 and virtual) then
+					-- add key to inventory
+					inv:add_item("main", key)
+				end
 			else
 				minetest.chat_send_player(name, S("There is no room in your inventory for a key."))
 			end
@@ -260,8 +263,11 @@ local function get_key_list(serialized_krs, name)
 			first = false
 		end
 		list = list..F(v.user_description or v.description)
-		if (v.number > 1) then
+		if (v.number > 1) or (v.virtual and (v.number == 1)) then
 			list = list..F(" (×"..v.number..")")
+		end
+		if v.virtual then
+			list = list..F(v.virtual and " [virtual]" or "")
 		end
 	end
 	return list
