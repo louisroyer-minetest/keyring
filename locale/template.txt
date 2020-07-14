@@ -52,6 +52,7 @@ You must enter a player name first.=
 You must select a key first.=
 You must select a player first.=
 You own this keyring.=
+[virtual]=
 
 ### privileges.lua ###
 

@@ -52,6 +52,7 @@ You must enter a player name first.=Vous devez d’abord entrer le nom d’un jo
 You must select a key first.=Vous devez d’abord sélectionner une clé.
 You must select a player first.=Vous devez d’abord sélectionner un joueur.
 You own this keyring.=Ce trousseau vous appartient.
+[virtual]=[virtuel]
 
 ### privileges.lua ###
 

@@ -1,6 +1,14 @@
 -- Translation support
 local S = minetest.get_translator("keyring")
 
+keyring.form.register_allowed("keyring:personal_keyring", {
+	remove_key = true,
+	rename_key = true,
+	set_owner = true,
+	share = true,
+	title_tab = true,
+})
+
 --[[
 -- Clear secret if this is a personal keyring with an owner
 --]]
@@ -27,12 +35,12 @@ minetest.register_craftitem("keyring:personal_keyring", {
 			itemstack = keyring.craft_common.select_key(
 				itemstack, placer, minetest.get_meta(pos))
 		else -- no node pointed
-			itemstack = keyring.formspec(itemstack, placer)
+			itemstack = keyring.form.formspec(itemstack, placer)
 		end
 		return itemstack
 	end,
 	on_secondary_use = function(itemstack, placer, pointed_thing)
-		return keyring.formspec(itemstack, placer)
+		return keyring.form.formspec(itemstack, placer)
 	end,
 	on_drop = on_drop_personal_keyring,
 	-- mod doc
@@ -55,6 +63,12 @@ minetest.register_craft({
 minetest.register_craft({
 	output = "keyring:personal_keyring",
 	recipe = { "keyring:personal_keyring", "group:key" },
+	type = "shapeless",
+})
+
+minetest.register_craft({
+	output = "keyring:personal_keyring",
+	recipe = { "keyring:personal_keyring", "group:key_container" },
 	type = "shapeless",
 })
 

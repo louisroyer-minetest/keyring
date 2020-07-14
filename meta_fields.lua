@@ -4,7 +4,7 @@ keyring.fields = {utils = {}}
 --  {
 --      <secret1>, {
 --          number: <number>,
---          virtual: bolean,
+--          virtual: boolean,
 --          description: <description>,
 --          user_description: <user_description>
 --      }
