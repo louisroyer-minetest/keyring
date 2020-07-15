@@ -24,6 +24,7 @@ group:key    group:wire   group:key
 This gives back 4 `basic_materials:empty_spool`.
 In both crafts, keys (or `group:key`) items will be added to the resulting keyring.
 ![Screenshot](screenshot.png)
+![Screenshot](screenshot_2.png)
 
 ### Personal keyring (shapeless)
 - `keyring:keyring`
