@@ -23,6 +23,7 @@ group:key    group:wire   group:key
 
 This gives back 4 `basic_materials:empty_spool`.
 In both crafts, keys (or `group:key`) items will be added to the resulting keyring.
+![Screenshot](screenshot.png)
 
 ### Personal keyring (shapeless)
 - `keyring:keyring`
@@ -32,6 +33,11 @@ In both crafts, keys (or `group:key`) items will be added to the resulting keyri
 - `group:key` (`default:key` or `keyring:keyring`/`keyring:personal_keyring`)
 - `keyring:keyring`/`keyring:personal_keyring`
 
+or
+- `group:virtual_key`
+- `keyring:keyring`/`keyring:personal_keyring`
+
+
 Notes:
 - if you use a personal keyring in the craft, then it must belong to you, else the craft will be forbidden.
 - when merging two keyrings, an empty keyring will be returned back
@@ -40,7 +46,8 @@ Notes:
 - [basic_materials](https://gitlab.com/VanessaE/basic_materials)
 - default
 
-![Screenshot](screenshot.png)
+## Suggested
+- [virtual_key](https://github.com/louisroyer/minetest-virtual-key): you can create virtual keys using a registerer and import them into your keyring; virtual keys is a good way to share access with friends without having to craft a lot of keys or to share a keyring.
 
 ## License
 - CC0-1.0, Louis Royer 2020
