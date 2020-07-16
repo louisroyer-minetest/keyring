@@ -275,7 +275,7 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 	-- write owner
 	meta:set_string("description",
 		ItemStack("keyring:personal_keyring"):get_description()
-		.." "..S("(owned by @1)", play_name))
+		.." ("..S("owned by @1", play_name)..")")
 	meta:set_string("owner", play_name)
 	return itemstack
 end)
@@ -299,7 +299,7 @@ minetest.register_craft_predict(function(itemstack, player, old_craft_grid, craf
 	-- showing the right description
 	local meta = itemstack:get_meta()
 	meta:set_string("description",
-		itemstack:get_description().." "..S("(owned by @1)", play_name))
+		itemstack:get_description().." ("..S("owned by @1", play_name)..")")
 	meta:set_string("owner", play_name)
 	return itemstack
 end)

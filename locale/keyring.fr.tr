@@ -9,8 +9,8 @@ Key not found in keyring.=La clé n’est pas dans ce trousseau.
 ### craft_common.lua ###
 ### formspec.lua ###
 
-(owned by @1)=(appartient à @1)
 You are not allowed to use this keyring.=Vous n’êtes pas autorisé à utiliser ce trousseau.
+owned by @1=appartient à @1
 
 ### craft_keyring.lua ###
 

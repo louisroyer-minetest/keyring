@@ -240,7 +240,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 				meta:set_string("owner", name)
 				meta:set_string("description",
 					ItemStack(item_name):get_description()
-					.." "..S("(owned by @1)", name))
+					.." ("..S("owned by @1", name)..")")
 			elseif fields.make_public then
 				meta:set_string("owner", "")
 				meta:set_string("description",
