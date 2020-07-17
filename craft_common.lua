@@ -12,7 +12,9 @@ keyring.craft_common.select_key = function(itemstack, placer, meta)
 	local i_meta = itemstack:get_meta()
 	local name = placer:get_player_name()
 	local keyring_owner = i_meta:get_string("owner")
-	local keyring_access = keyring.fields.utils.owner.is_edit_allowed(keyring_owner, name)
+	local keyring_access = keyring.fields.utils.owner.is_edit_allowed(keyring_owner, name) or
+		keyring.fields.utils.shared.is_shared_with(name,
+		i_meta:get_string(keyring.fields.shared))
 	local owner = meta:get_string("owner")
 	local secret = meta:get_string("key_lock_secret")
 	if (secret == i_meta:get_string("secret") and keyring_access)
