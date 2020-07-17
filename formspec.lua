@@ -23,6 +23,144 @@ minetest.register_on_leaveplayer(function(player)
 	reset_context(name)
 end)
 
+local form_allowed = {}
+
+keyring.form = {}
+--[[
+-- Features:
+-- - translator: function used for translation
+-- - virtual_symbol: String or nil (default)
+-- - title_tab: bool
+-- - title_tab_management: String or nil (default)
+-- - title_tab_settings: String or nil (default)
+-- - msg_not_allowed_edit: String or nil (default)
+-- - msg_is_public: String or nil (default)
+-- - msg_you_own: String or nil (default)
+-- - msg_is_owned_by: Untranslated String or nil (default)
+-- - msg_is_shared_with: String or nil (default)
+-- - msg_not_allowed_use: String or nil (default)
+-- - msg_not_shared: String or nil (default)
+-- - msg_list_of_keys: String or nil (default)
+-- - msg_no_key: String or nil (default)
+-- - remove_key: bool
+-- - rename_key: bool
+-- - set_owner: bool
+-- - share: bool
+--
+--]]
+keyring.form.register_allowed = function(itemname, features)
+	form_allowed[itemname] = features
+end
+
+
+--[[
+-- Returns a table containing
+-- - is_use_allowed: bool
+-- - msg_not_use_allowed: msg
+-- - display_title_tabs: bool
+-- - title_tab_management: String
+-- - title_tab_settings: String
+-- - msg_owner: String
+-- - display_set_owner_button: bool
+-- - is_owned: bool
+-- - display_msg_shared: bool
+-- - msg_shared: String
+-- - msg_shared_pos: String containing pos
+-- - display_shared_list: bool
+-- - shared_list_start_pos: String containing start pos
+-- - shared_list_size: String containing size
+-- - display_share_button: bool
+-- - display_unshare_button: bool
+-- - msg_list_keys: String
+-- - display_keys_list: bool
+-- - keys_list_size: String containing size
+-- - key_virtual_symbol: String
+-- - display_rename_button: bool
+-- - display_remove_button: bool
+--
+--]]
+local function get_formspec_properties(itemstack, player)
+	local props = {}
+	local item_name = itemstack:get_name()
+	local FA = form_allowed[item_name]
+	local item_meta = itemstack:get_meta()
+	local player_name = player:get_player_name()
+	local keyring_owner = item_meta:get_string("owner")
+	local keyring_allowed = keyring.fields.utils.owner.is_edit_allowed(keyring_owner,
+		player_name)
+	local has_list_priv = minetest.check_player_privs(player_name, { keyring_inspect=true })
+	local shared = item_meta:get_string(keyring.fields.shared)
+	local is_shared_with = keyring.fields.utils.shared.is_shared_with(player_name, shared)
+	local has_keys = next(minetest.deserialize(
+		item_meta:get_string(keyring.fields.KRS)) or {}) or false
+
+	props.is_use_allowed = (keyring_allowed or has_list_priv or is_shared_with) and FA
+		and true or false
+	if not props.is_use_allowed then
+		props.msg_not_use_allowed = FA.msg_not_allowed_use
+			or S("You are not allowed to use this keyring.")
+		return props
+	end
+
+	props.display_title_tabs = FA.title_tab
+	if props.display_title_tabs then
+		props.title_tab_management = FA.title_tab_management or S("Keys management")
+		props.title_tab_settings = FA.title_tab_settings or S("Keyring settings")
+	end
+
+	if keyring_owner == player_name then
+		props.msg_owner = FA.msg_you_own or S("You own this keyring.")
+		props.display_set_owner_button = FA.set_owner or false
+		props.is_owned = true
+		props.display_share_button = FA.share or false
+		props.display_unshare_button = FA.share and (shared ~= nil) and (shared ~= "") or false
+	elseif keyring_owner ~= "" then
+		props.msg_owner = (FA.translator and FA.msg_is_owned_by)
+			and FA.translator(FA.msg_is_owned_by, keyring_owner)
+			or S("This keyring is owned by @1.", keyring_owner)
+		props.display_set_owner_button = false
+		props.is_owned = true
+		props.display_share_button = false
+		props.display_unshare_button = false
+	else
+		props.msg_owner = FA.msg_is_public or S("This keyring is public.")
+		props.display_set_owner_button = FA.set_owner or false
+		props.is_owned = false
+		props.display_share_button = false
+		props.display_unshare_button = false
+	end
+
+	if props.is_owned then
+		props.display_msg_shared = true
+		props.msg_shared_pos = props.display_set_owner_button and "3" or "2"
+		props.shared_list_start_pos = props.display_set_owner_button and "3.75" or "2.75"
+		local slsize = 4
+			+ ((not props.display_set_owner_button) and 1 or 0)
+			+ ((not props.display_share_button) and 1 or 0)
+		props.shared_list_size = tostring(slsize)
+		if (shared ~= nil) and (shared ~= "") then
+			props.display_shared_list = FA.share or false
+			props.msg_shared = FA.msg_is_shared_with or S("This keyring is shared with:")
+		else
+			props.display_shared_list = false
+			props.msg_shared = FA.msg_not_shared or S("This keyring is not shared.")
+		end
+	end
+	if has_keys then
+		props.display_keys_list = true
+		props.msg_list_keys = FA.msg_list_of_keys or S("List of keys in the keyring")
+		props.key_virtual_symbol = FA.virtual_symbol or S("[virtual]")
+		props.display_rename_button = FA.rename_key or false
+		props.display_remove_button = FA.remove_key or false
+	else
+		props.display_keys_list = false
+		props.msg_list_keys = FA.msg_no_key or S("There is no key in the keyring.")
+		props.display_rename_button = false
+		props.display_remove_button = false
+	end
+	props.keys_list_size = props.display_rename_button and "7" or "8"
+	return props
+end
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
 	-- guard
@@ -38,22 +176,32 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 
 	-- check abuses
 	local item = player:get_wielded_item()
+	local item_name = item:get_name()
 	local meta = item:get_meta()
-	if item:get_name() ~= "keyring:keyring"
-		and item:get_name() ~= "keyring:personal_keyring" then
+	local FA = form_allowed[item_name]
+	-- check item is allowed
+	if FA == nil then
 		keyring.log("action", "Player "..name..
-			" sent a keyring action but has no keyring in hand.")
+			" sent a keyring action but the selected item ("..item_name..") is not allowed.")
+		return
+	end
+
+	-- check item group
+	if not (minetest.get_item_group(item_name, "key_container") == 1) then
+		keyring.log("action", "Player "..name..
+			" sent a keyring action but the selected item ("
+			..item_name..") is not a key container.")
 		return
 	end
 	local krs = meta:get_string(keyring.fields.KRS)
 	if krs ~= context[name] then
 		keyring.log("action", "Player "..name
-			.." sent a keyring action but has not the right keyring in hand.")
+			.." sent a keyring action but the selected item is not the right key container.")
 		return
 	end
 
 	-- edits rights not required for this section
-	if item:get_name() == "keyring:personal_keyring" then
+	if FA.title_tab then
 		-- tabheader selection
 		if fields.header == "2" then
 			tab[name] = true
@@ -61,7 +209,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			tab[name] = nil
 		end
 		if fields.header then
-			keyring.formspec(item, minetest.get_player_by_name(name))
+			keyring.form.formspec(item, minetest.get_player_by_name(name))
 		end
 	end
 
@@ -73,40 +221,41 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		if (not minetest.check_player_privs(name, { keyring_inspect=true })) and
 			not keyring.fields.utils.shared.is_shared_with(name, shared) then
 			keyring.log("action", "Player "..name
-				.." sent command to manage keys of a keyring owned by "
+				.." sent command to manage keys of a "..item_name.." owned by "
 				..(keyring_owner or "unknown player"))
 		end
 		return
 	end
 
-	if item:get_name() == "keyring:personal_keyring" then
+	if FA.share or FA.set_owner then
 		-- make owner
-		if fields.make_private or fields.make_public then
+		if fields.make_private or fields.make_public and FA.set_owner then
 			if not keyring_allowed then
 				minetest.chat_send_player(name,
+					FA.msg_not_allowed_edit or
 					S("You are not allowed to edit settings of this keyring."))
 				return
 			end
 			if fields.make_private  then
 				meta:set_string("owner", name)
 				meta:set_string("description",
-					ItemStack("keyring:personal_keyring"):get_description()
-					.." "..S("(owned by @1)", name))
+					ItemStack(item_name):get_description()
+					.." ("..S("owned by @1", name)..")")
 			elseif fields.make_public then
 				meta:set_string("owner", "")
 				meta:set_string("description",
-					ItemStack("keyring:personal_keyring"):get_description())
+					ItemStack(item_name):get_description())
 			end
 			player:set_wielded_item(item)
-			keyring.formspec(item, minetest.get_player_by_name(name))
+			keyring.form.formspec(item, minetest.get_player_by_name(name))
 		end
-		if keyring_owner == name then
+		if (keyring_owner == name) and FA.share then
 			if fields.share_player_dropdown and fields.player_dropdown
 				and fields.player_dropdown ~= "" then
 				meta:set_string(keyring.fields.shared, shared..
 					((shared ~="") and " " or "")..fields.player_dropdown)
 				player:set_wielded_item(item)
-				keyring.formspec(item, minetest.get_player_by_name(name))
+				keyring.form.formspec(item, minetest.get_player_by_name(name))
 			end
 			if (fields.share_player_button or (fields.key_enter and fields.key_enter_field
 				and fields.key_enter_field == "share_player")) and fields.share_player
@@ -118,7 +267,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 				meta:set_string(keyring.fields.shared, shared..
 					((shared ~="") and " " or "")..concat)
 					player:set_wielded_item(item)
-				keyring.formspec(item, minetest.get_player_by_name(name))
+				keyring.form.formspec(item, minetest.get_player_by_name(name))
 			end
 			if fields.unshare and selected_player[name]
 				and selected_player[name] ~= "" then
@@ -131,7 +280,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 					selected_player_num[name], shared)
 				meta:set_string(keyring.fields.shared, shared)
 				player:set_wielded_item(item)
-				keyring.formspec(item, minetest.get_player_by_name(name))
+				keyring.form.formspec(item, minetest.get_player_by_name(name))
 			end
 
 			-- refresh selected player
@@ -142,7 +291,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 						event.index, shared)
 					if selected_player[name] == "" then
 						keyring.log("action", "Player "..name
-							.." selected a player in keyring settings interface"
+							.." selected a player in "..item_name.." settings interface"
 							.." but this player is not in the list.")
 					else
 						selected_player_num[name] = event.index
@@ -171,7 +320,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		if event.type ~= "INV" then
 			if key_list[name] == nil or event.index > #key_list[name] then
 				keyring.log("action", "Player "..name
-					.." selected a key in keyring interface"
+					.." selected a key in "..item_name.." interface"
 					.." but this key does not exist.")
 				return
 			end
@@ -191,17 +340,18 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		if (fields.rename or (fields.key_enter and fields.key_enter_field
 			and fields.key_enter_field == "new_name"))
 			and key_list[name] and selected[name] and selected[name] <= #key_list[name]
-			and fields.new_name and fields.new_name ~= "" and selected[name] then
+			and fields.new_name and fields.new_name ~= "" and selected[name]
+			and FA.rename_key then
 			local u_krs = minetest.deserialize(krs)
 			u_krs[key_list[name][selected[name]]].user_description = fields.new_name
 			meta:set_string(keyring.fields.KRS, minetest.serialize(u_krs))
 			player:set_wielded_item(item)
-			keyring.formspec(item, minetest.get_player_by_name(name))
+			keyring.form.formspec(item, minetest.get_player_by_name(name))
 			return
 		end
 		-- put the key out of keyring
 		if fields.remove and selected[name] and key_list[name] and selected[name]
-			and selected[name] <= #key_list[name] then
+			and selected[name] <= #key_list[name] and FA.remove_key then
 			local key = ItemStack("default:key")
 			local u_krs = minetest.deserialize(krs)
 			local key_meta = key:get_meta()
@@ -211,22 +361,25 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			key_meta:set_string("description",
 				u_krs[key_list[name][selected[name]]].description)
 			local inv = minetest.get_player_by_name(name):get_inventory()
-			if inv:room_for_item("main", key) then
+			local number = u_krs[key_list[name][selected[name]]].number
+			local virtual = u_krs[key_list[name][selected[name]]].virtual
+			if inv:room_for_item("main", key) or ((number == 0) and virtual) then
 				-- remove key from keyring
-				local number = u_krs[key_list[name][selected[name]]].number
-				if number > 1 then
+				if (number > 1) or (number == 1 and virtual) then
 					-- remove only 1 key
 					u_krs[key_list[name][selected[name]]].number = number -1
-				else
+				elseif (number == 1) or ((number == 0) and virtual) then
 					u_krs[key_list[name][selected[name]]] = nil
 				end
 				-- apply
 				item:get_meta():set_string(keyring.fields.KRS, minetest.serialize(u_krs))
 				player:set_wielded_item(item)
-				keyring.formspec(item, minetest.get_player_by_name(name))
+				keyring.form.formspec(item, minetest.get_player_by_name(name))
 
-				-- add key to inventory
-				inv:add_item("main", key)
+				if not (number == 0 and virtual) then
+					-- add key to inventory
+					inv:add_item("main", key)
+				end
 			else
 				minetest.chat_send_player(name, S("There is no room in your inventory for a key."))
 			end
@@ -242,10 +395,10 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 end)
 
 --[[ Get key list
--- parameter: serialized krs and player name
+-- parameter: serialized krs, player name and symbol utilized for virtual keys
 -- return: key list
 --]]
-local function get_key_list(serialized_krs, name)
+local function get_key_list(serialized_krs, name, virtual_symbol)
 	local krs = minetest.deserialize(serialized_krs) or {}
 	local list = ""
 	local first = true
@@ -260,8 +413,13 @@ local function get_key_list(serialized_krs, name)
 			first = false
 		end
 		list = list..F(v.user_description or v.description)
-		if (v.number > 1) then
+		if (v.number > 1) or (v.virtual and (v.number == 1)) then
 			list = list..F(" (×"..v.number..")")
+		end
+		if v.virtual then
+			list = list..F(v.virtual
+				and (((virtual_symbol ~= "") and " " or "")..(virtual_symbol))
+				or "")
 		end
 	end
 	return list
@@ -304,58 +462,50 @@ end
 -- itemstack: a keyring:keyring
 -- player: the player to show formspec
 --]]
-keyring.formspec = function(itemstack, player)
+keyring.form.formspec = function(itemstack, player)
+	local item_meta = itemstack:get_meta()
 	local name = player:get_player_name()
-	local keyring_owner = itemstack:get_meta():get_string("owner")
-	local keyring_allowed = keyring.fields.utils.owner.is_edit_allowed(keyring_owner,
-		name)
-	local has_list_priv = minetest.check_player_privs(name, { keyring_inspect=true })
-	local shared = itemstack:get_meta():get_string(keyring.fields.shared)
-	local is_shared_with = keyring.fields.utils.shared.is_shared_with(name, shared)
-	if not (keyring_allowed or has_list_priv or is_shared_with) then
+	local props = get_formspec_properties(itemstack, player)
+	if not props.is_use_allowed then
+		local item_name = itemstack:get_name()
+		local keyring_owner = item_meta:get_string("owner")
 		keyring.log("action", "Player "..name
-			.." tryed to access key management of a keyring owned by "
+			.." tryed to access key management of a "..item_name.." owned by "
 			..(keyring_owner or "unknown player"))
-		minetest.chat_send_player(name, S("You are not allowed to use this keyring."))
+		minetest.chat_send_player(name, props.msg_not_use_allowed)
 		return itemstack
 	end
-	local keyring_type = itemstack:get_name()
-	local krs = itemstack:get_meta():get_string(keyring.fields.KRS)
+	local krs = item_meta:get_string(keyring.fields.KRS)
+	local shared = item_meta:get_string(keyring.fields.shared)
 	-- formspec
 	local formspec = "formspec_version[3]"
 		.."size[10.75,11.25]"
-	if keyring_type == "keyring:personal_keyring" then
+	if props.display_title_tabs then
 		-- tabheader
 		formspec = formspec.."tabheader[0,0;10.75,1;header;"
-			..S("Keys management")..","..S("Keyring settings")..";"
+			..props.title_tab_management
+			..","..props.title_tab_settings..";"
 			..(tab[name] and "2" or "1")..";false;true]"
 	end
 	if tab[name] then
-		local protected = false
-		local public = false
-		if keyring_owner == name then
-			formspec = formspec.."label[1,1;"..F(S("You own this keyring.")).."]"
-				.."button[1,1.5;5,1;make_public;"..F(S("Make public")).."]"
-		elseif keyring_owner and keyring_owner ~= "" then
-			formspec = formspec.."label[1,1;"
-				..F(S("This keyring is owned by @1.", keyring_owner)).."]"
-			protected = true
-		else
-			formspec = formspec.."label[1,1;"..F(S("This keyring is public.")).."]"
-				.."button[1,1.5;5,1;make_private;"..F(S("Make private")).."]"
-			public = true
+		formspec = formspec.."label[1,1;"..F(props.msg_owner).."]"
+		if props.display_set_owner_button then
+			formspec = formspec.."button[1,1.5;5,1;"
+				..(props.is_owned and "make_public" or"make_private")..";"
+				..F(props.is_owned and S("Make public") or S("Make private"))
+				.."]"
 		end
-		if (not public) and shared ~= nil and shared ~= "" then
-			formspec = formspec.."label[1,"..(protected and "2" or "3")
-				..";"..F(S("This keyring is shared with:")).."]"
-				.."textlist[1,"..(protected and "2.75" or "3.75")
-				..";8.75,"..(protected and "6" or "4")
-				..";selected_player;"..get_player_shared_list(shared, name).."]"
-		elseif not public then
-			formspec = formspec.."label[1,"..(protected and "2" or "3")
-				..";"..F(S("This keyring is not shared.")).."]"
+		if props.display_msg_shared then
+			formspec = formspec.."label[1,"..props.msg_shared_pos..";"..F(props.msg_shared).."]"
 		end
-		if (not protected) and (not public) then
+		if props.display_shared_list then
+			formspec = formspec.."textlist[1,"
+				..props.shared_list_start_pos
+				..";8.75,"..props.shared_list_size
+				..";selected_player;"
+				..get_player_shared_list(shared, name).."]"
+		end
+		if props.display_share_button then
 			formspec = formspec
 				-- dropdown
 				.."dropdown[1,8;5,1;player_dropdown;"
@@ -366,32 +516,28 @@ keyring.formspec = function(itemstack, player)
 				.."field_close_on_enter[share_player;false]"
 				.."button[6.5,9;3.25,1;share_player_button;"..F(S("Share")).."]"
 		end
-		if (not protected) and (not public) and shared ~= nil and shared ~= "" then
+		if props.display_unshare_button then
 			formspec = formspec
 				.."button[1,10;5,1;unshare;"..F(S("Unshare")).."]"
 		end
 	else
-		local has_keys = next(minetest.deserialize(krs) or {}) ~= nil
-		if has_keys then
-			formspec = formspec
-				-- header label
-				.."label[1,1;"..F(S("List of keys in the keyring")).."]"
-				-- list of keys
-				.."textlist[1,1.75;8.75,"
-				..( -- space for rename button
-					(keyring_type == "keyring:personal_keyring" and not keyring_allowed)
-					and "8" or "7"
-				)
-			formspec = formspec..";selected_key;"..get_key_list(krs, name).."]"
-			if keyring_allowed or (keyring_type ~= "keyring:personal_keyring") then
-				-- rename button
-				formspec = formspec.."button[1,9;5,1;rename;"..F(S("Rename key")).."]"
-					.."field[6.5,9;3.25,1;new_name;;]"
-					.."field_close_on_enter[new_name;false]"
-					.."button[1,10;5,1;remove;"..F(S("Remove key")).."]"
-			end
-		else
-			formspec = formspec.."label[1,1;"..F(S("There is no key in the keyring.")).."]"
+		formspec = formspec
+			-- header label
+			.."label[1,1;"..F(props.msg_list_keys).."]"
+			-- list of keys
+		if props.display_keys_list then
+		formspec = formspec.."textlist[1,1.75;8.75,"
+			..props.keys_list_size..";selected_key;"
+			..get_key_list(krs, name, props.key_virtual_symbol).."]"
+		end
+		if props.display_rename_button then
+			-- rename button
+			formspec = formspec.."button[1,9;5,1;rename;"..F(S("Rename key")).."]"
+			.."field[6.5,9;3.25,1;new_name;;]"
+			.."field_close_on_enter[new_name;false]"
+		end
+		if props.display_remove_button then
+			formspec = formspec.."button[1,10;5,1;remove;"..F(S("Remove key")).."]"
 		end
 	end
 	formspec = formspec.."button_exit[6.5,10;3.25,1;exit;"..F(S("Exit")).."]"

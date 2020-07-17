@@ -9,8 +9,8 @@ Key not found in keyring.=
 ### craft_common.lua ###
 ### formspec.lua ###
 
-(owned by @1)=
 You are not allowed to use this keyring.=
+owned by @1=
 
 ### craft_keyring.lua ###
 
@@ -52,6 +52,7 @@ You must enter a player name first.=
 You must select a key first.=
 You must select a player first.=
 You own this keyring.=
+[virtual]=
 
 ### privileges.lua ###
 

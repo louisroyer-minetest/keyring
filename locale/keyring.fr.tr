@@ -9,8 +9,8 @@ Key not found in keyring.=La clé n’est pas dans ce trousseau.
 ### craft_common.lua ###
 ### formspec.lua ###
 
-(owned by @1)=(appartient à @1)
 You are not allowed to use this keyring.=Vous n’êtes pas autorisé à utiliser ce trousseau.
+owned by @1=appartient à @1
 
 ### craft_keyring.lua ###
 
@@ -52,6 +52,7 @@ You must enter a player name first.=Vous devez d’abord entrer le nom d’un jo
 You must select a key first.=Vous devez d’abord sélectionner une clé.
 You must select a player first.=Vous devez d’abord sélectionner un joueur.
 You own this keyring.=Ce trousseau vous appartient.
+[virtual]=[virtuel]
 
 ### privileges.lua ###
 
