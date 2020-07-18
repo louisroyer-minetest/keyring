@@ -1,6 +1,6 @@
 -- Look for required things in
 package.path = "../?.lua;" .. package.path
-_G.keyring = {}
+_G.keyring = {settings = {}}
 -- Run meta_fields.lua file
 require("meta_fields")
 
