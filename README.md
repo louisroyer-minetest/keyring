@@ -47,6 +47,9 @@ Notes:
 - [basic_materials](https://gitlab.com/VanessaE/basic_materials)
 - default
 
+## Supported
+- [playerfactions](https://git.leagueh.xyz/katp32/playerfactions): you can share a personal keyring with factions using syntax `faction:<faction_name>`.
+
 ## Suggested
 - [virtual_key](https://github.com/louisroyer/minetest-virtual-key): you can create virtual keys using a registerer and import them into your keyring; virtual keys is a good way to share access with friends without having to craft a lot of keys or to share a keyring.
 
@@ -54,7 +57,8 @@ Notes:
 - CC0-1.0, Louis Royer 2020
 
 ## Settings
-Setting `keyring.personal_keyring` is available to disable/enable personal keyring (enabled by default).
+- Setting `keyring.personal_keyring` is available to disable/enable personal keyring (enabled by default).
+- Setting `keyring.playerfactions` is available to disable/enable the possiblity to share personal keyrings with factions (enabled by default).
 
 ## Privileges
 You can grant the privilege `keyring_inspect` to allow a player to list keys of personal keyrings owned by other players.

@@ -436,7 +436,7 @@ local function get_player_shared_list(player_list, name)
 	return player_list:gsub("%s+", ",")
 end
 
---[[ Get connected players list (not already in shared)
+--[[ Get connected players list + player’s faction (not already in shared)
 -- parameter: list of players separated by space, player name
 --]]
 local function get_player_list_connected(player_list, name)
@@ -446,7 +446,7 @@ local function get_player_list_connected(player_list, name)
 	for _, v in pairs(list) do
 		local v_name = v:get_player_name()
 		if (v_name ~= name) and
-			not keyring.fields.utils.shared.is_shared_with(v_name, player_list) then
+			not keyring.fields.utils.shared.is_shared_with_raw(v_name, player_list) then
 			if not first then
 				res_list = res_list..","
 			else
@@ -455,6 +455,20 @@ local function get_player_list_connected(player_list, name)
 			res_list = res_list..v_name
 		end
 	end
+	if not keyring.settings.playerfactions then
+		return res_list
+	end
+	local p_fac = factions.get_player_faction(name)
+	if (p_fac == nil) then
+		return res_list
+	end
+	if keyring.fields.utils.shared.is_shared_with_raw("faction:"..p_fac, player_list) then
+		return res_list
+	end
+	if not first then
+		res_list = res_list..","
+	end
+	res_list = res_list.."faction:"..p_fac
 	return res_list
 end
 

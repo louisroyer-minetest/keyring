@@ -64,13 +64,33 @@ keyring.fields.description = "_keyring_user_description"
 --]]
 keyring.fields.shared = "_keyring_shared"
 
---[[ True if list said the keyring is shared with this player
+--[[
+-- True if list said the keyring is shared with this faction
+-- or directly to this player (not via faction)
+-- parameters:
+-- - name: name of the player/faction
+-- - list: list of players + factions
+--]]
+keyring.fields.utils.shared.is_shared_with_raw = function(name, list)
+	return (" "..list.." "):find(" "..name.." ", 1, true) and true or false
+end
+
+--[[
+-- True if list said the keyring is shared with this player
+-- either directly or via factions
 --]]
 keyring.fields.utils.shared.is_shared_with = function(playername, list)
+	if keyring.settings.playerfactions then
+		local p_fac = factions.get_player_faction(playername)
+		if (p_fac ~= nil) and (" "..list.." "):find(" faction:"..p_fac.." ", 1, true) then
+			return true
+		end
+	end
 	return (" "..list.." "):find(" "..playername.." ", 1, true) and true or false
 end
 
---[[ Remove name from shared list
+--[[
+-- Remove name from shared list
 --]]
 keyring.fields.utils.shared.remove = function(playername, list)
 	-- cannot use directly gsub because there is a risk of user injection

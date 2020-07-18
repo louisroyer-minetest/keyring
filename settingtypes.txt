@@ -1,1 +1,2 @@
 keyring.personal_keyring (Enable personal keyrings) bool true
+keyring.playerfactions (Enable the possiblity to share personal keyrings with factions) bool true

@@ -27,4 +27,5 @@ stds.minetest = {
 
 read_globals = {
 	"basic_materials",
+	"factions",
 }

@@ -3,13 +3,19 @@ local MP = minetest.get_modpath("keyring")
 keyring = {}
 
 -- mod information
-keyring.mod = {version = "1.2.0", author = "Louis Royer"}
+keyring.mod = {version = "1.2.1", author = "Louis Royer"}
 
 -- keyring settings
 keyring.settings =
 	{
 		personal_keyring = minetest.settings:get_bool("keyring.personal_keyring", true),
+		playerfactions = minetest.settings:get_bool("keyring.playerfactions", true),
 	}
+
+-- disable playerfactions if not loaded
+if not minetest.get_modpath("playerfactions") then
+	keyring.settings.playerfactions = false
+end
 
 -- XXX: when https://github.com/minetest/minetest/pull/7377
 --      is merged, we can remove this function and %s/keyring\.log/minetest\.log/g
