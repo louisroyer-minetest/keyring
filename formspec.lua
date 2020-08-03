@@ -46,6 +46,10 @@ keyring.form = {}
 -- - rename_key: bool
 -- - set_owner: bool
 -- - share: bool
+-- - msg_manage_keys: String or nil (default)
+-- - msg_not_manage_keys: String or nil (default)
+-- - msg_button_allow_manage_keys: String or nil (default)
+-- - msg_button_deny_manage_keys: String or nil (default)
 --
 --]]
 keyring.form.register_allowed = function(itemname, features)
@@ -56,7 +60,7 @@ end
 --[[
 -- Returns a table containing
 -- - is_use_allowed: bool
--- - msg_not_use_allowed: msg
+-- - msg_not_use_allowed: String
 -- - display_title_tabs: bool
 -- - title_tab_management: String
 -- - title_tab_settings: String
@@ -77,6 +81,10 @@ end
 -- - key_virtual_symbol: String
 -- - display_rename_button: bool
 -- - display_remove_button: bool
+-- - msg_manage_keys: String
+-- - msg_manage_keys_pos: String containing start pos
+-- - msg_manage_keys_button: String
+-- - manage_keys_button_pos: String containing start pos
 --
 --]]
 local function get_formspec_properties(itemstack, player)
