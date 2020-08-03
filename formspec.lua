@@ -46,6 +46,7 @@ keyring.form = {}
 -- - rename_key: bool
 -- - set_owner: bool
 -- - share: bool
+-- - share_management: bool (default: true)
 -- - msg_manage_keys: String or nil (default)
 -- - msg_not_manage_keys: String or nil (default)
 -- - msg_button_allow_manage_keys: String or nil (default)
@@ -86,6 +87,7 @@ end
 -- - display_manage_keys_button: bool
 -- - msg_manage_keys_button: String
 -- - manage_keys_button_pos: String containing start pos
+-- - action_manage_keys_button: String containing name of action button
 --
 --]]
 local function get_formspec_properties(itemstack, player)
@@ -100,8 +102,10 @@ local function get_formspec_properties(itemstack, player)
 	local has_list_priv = minetest.check_player_privs(player_name, { keyring_inspect=true })
 	local shared = item_meta:get_string(keyring.fields.shared)
 	local is_shared_with = keyring.fields.utils.shared.is_shared_with(player_name, shared)
-	local key_management_allowed = (keyring.fields.utils.owner.is_key_management_allowed(
-		keyring_owner, shared, item_meta:get_int(keyring.fields.shared_key_management)) == 1)
+	local shared_key_management = item_meta:get_int(
+		keyring.fields.shared_key_management)
+	local key_management_allowed = keyring.fields.utils.owner.is_key_management_allowed(
+		keyring_owner, shared, shared_key_management, player_name)
 	local has_keys = next(minetest.deserialize(
 		item_meta:get_string(keyring.fields.KRS)) or {}) or false
 
@@ -125,6 +129,8 @@ local function get_formspec_properties(itemstack, player)
 		props.is_owned = true
 		props.display_share_button = FA.share or false
 		props.display_unshare_button = FA.share and (shared ~= nil) and (shared ~= "") or false
+		props.display_manage_keys_button = FA.share_management
+			and (shared ~= nil) and (shared ~= "") or true
 	elseif keyring_owner ~= "" then
 		props.msg_owner = (FA.translator and FA.msg_is_owned_by)
 			and FA.translator(FA.msg_is_owned_by, keyring_owner)
@@ -133,25 +139,43 @@ local function get_formspec_properties(itemstack, player)
 		props.is_owned = true
 		props.display_share_button = false
 		props.display_unshare_button = false
+		props.display_manage_keys_button = false
 	else
 		props.msg_owner = FA.msg_is_public or S("This keyring is public.")
 		props.display_set_owner_button = FA.set_owner or false
 		props.is_owned = false
 		props.display_share_button = false
 		props.display_unshare_button = false
+		props.display_manage_keys_button = false
 	end
 
 	if props.is_owned then
 		props.display_msg_shared = true
 		props.msg_shared_pos = props.display_set_owner_button and "3" or "2"
 		props.shared_list_start_pos = props.display_set_owner_button and "3.75" or "2.75"
-		local slsize = 4
+		local slsize = 3
 			+ ((not props.display_set_owner_button) and 1 or 0)
 			+ ((not props.display_share_button) and 1 or 0)
+			- (props.display_manage_keys_button and 1 or 0)
 		props.shared_list_size = tostring(slsize)
 		if (shared ~= nil) and (shared ~= "") then
 			props.display_shared_list = FA.share or false
 			props.msg_shared = FA.msg_is_shared_with or S("This keyring is shared with:")
+			if shared_key_management == 1 then
+				props.msg_manage_keys = FA.msg_manage_keys
+					or S("They are able to use the keyring and to manage keys.")
+				props.msg_manage_keys_button = FA.msg_button_deny_manage_keys
+					or S("Deny key management")
+				props.action_manage_keys_button = "deny_shared_management"
+			else
+				props.msg_manage_keys = FA.msg_not_manage_keys
+					or S("They are able to use the keyring but not to manage keys.")
+				props.msg_manage_keys_button = FA.msg_button_allow_manage_keys
+					or S("Allow key management")
+				props.action_manage_keys_button = "allow_shared_management"
+			end
+			props.msg_manage_keys_pos = "6.5"
+			props.manage_keys_button_pos = "7"
 		else
 			props.display_shared_list = false
 			props.msg_shared = FA.msg_not_shared or S("This keyring is not shared.")
@@ -228,8 +252,8 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	local keyring_owner = meta:get_string("owner")
 	local shared = meta:get_string(keyring.fields.shared)
 	local keyring_allowed = keyring.fields.utils.owner.is_edit_allowed(keyring_owner, name)
-	local key_management_allowed = (keyring.fields.utils.owner.is_key_management_allowed(
-		keyring_owner, shared, meta:get_int(keyring.fields.shared_key_management)) == 1)
+	local key_management_allowed = keyring.fields.utils.owner.is_key_management_allowed(
+		keyring_owner, shared, meta:get_int(keyring.fields.shared_key_management), name)
 	if not keyring_allowed then
 		if (not minetest.check_player_privs(name, { keyring_inspect=true })) and
 			not keyring.fields.utils.shared.is_shared_with(name, shared) then
@@ -261,6 +285,17 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			end
 			player:set_wielded_item(item)
 			keyring.form.formspec(item, minetest.get_player_by_name(name))
+		end
+		if (keyring_owner == name) and (FA.share_management ~= false) then
+			if fields.allow_shared_management then
+				meta:set_int(keyring.fields.shared_key_management, 1)
+				player:set_wielded_item(item)
+				keyring.form.formspec(item, minetest.get_player_by_name(name))
+			elseif fields.deny_shared_management then
+				meta:set_int(keyring.fields.shared_key_management, 0)
+				player:set_wielded_item(item)
+				keyring.form.formspec(item, minetest.get_player_by_name(name))
+			end
 		end
 		if (keyring_owner == name) and FA.share then
 			if fields.share_player_dropdown and fields.player_dropdown
@@ -531,6 +566,16 @@ keyring.form.formspec = function(itemstack, player)
 				..";8.75,"..props.shared_list_size
 				..";selected_player;"
 				..get_player_shared_list(shared, name).."]"
+				.."label[1,"
+				..props.msg_manage_keys_pos
+				..";"..F(props.msg_manage_keys).."]"
+			if props.display_manage_keys_button then
+				formspec = formspec.."button[1,"..props.manage_keys_button_pos
+					..";8.75,1;"
+					..props.action_manage_keys_button..";"
+					..F(props.msg_manage_keys_button)
+					.."]"
+			end
 		end
 		if props.display_share_button then
 			formspec = formspec
