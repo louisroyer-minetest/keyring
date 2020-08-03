@@ -255,7 +255,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	local keyring_allowed = keyring.fields.utils.owner.is_edit_allowed(keyring_owner, name)
 	local key_management_allowed = keyring.fields.utils.owner.is_key_management_allowed(
 		keyring_owner, shared, meta:get_int(keyring.fields.shared_key_management), name)
-	if not keyring_allowed then
+	if not keyring_management_allowed then
 		if (not minetest.check_player_privs(name, { keyring_inspect=true })) and
 			not keyring.fields.utils.shared.is_shared_with(name, shared) then
 			keyring.log("action", "Player "..name
