@@ -152,7 +152,8 @@ local function get_formspec_properties(itemstack, player)
 	if props.is_owned then
 		props.display_msg_shared = true
 		props.msg_shared_pos = props.display_set_owner_button and "3" or "2"
-		props.shared_list_start_pos = props.display_set_owner_button and "3.75" or "2.75"
+		local slstart = props.display_set_owner_button and 3.75 or 2.75
+		props.shared_list_start_pos = tostring(slstart)
 		local slsize = 3
 			+ ((not props.display_set_owner_button) and 1 or 0)
 			+ ((not props.display_share_button) and 1 or 0)
@@ -174,8 +175,8 @@ local function get_formspec_properties(itemstack, player)
 					or S("Allow key management")
 				props.action_manage_keys_button = "allow_shared_management"
 			end
-			props.msg_manage_keys_pos = "6.5"
-			props.manage_keys_button_pos = "7"
+			props.msg_manage_keys_pos = tostring(slstart + slsize + 0.75)
+			props.manage_keys_button_pos = tostring(slstart + slsize + 1.25)
 		else
 			props.display_shared_list = false
 			props.msg_shared = FA.msg_not_shared or S("This keyring is not shared.")
