@@ -102,7 +102,7 @@ keyring.craft_common.utils.get_craft_properties = function(old_craft_grid, craft
 				-- ownership of virtual key is checked, but does not determine
 				-- the ownership of resulting keyring
 				props.is_owned = true
-				if props.result_owner ~= nil then
+				if props.result_owner == nil then
 					props.result_owner = owner
 				end
 			end
