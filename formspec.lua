@@ -83,6 +83,7 @@ end
 -- - display_remove_button: bool
 -- - msg_manage_keys: String
 -- - msg_manage_keys_pos: String containing start pos
+-- - display_manage_keys_button: bool
 -- - msg_manage_keys_button: String
 -- - manage_keys_button_pos: String containing start pos
 --
@@ -99,6 +100,8 @@ local function get_formspec_properties(itemstack, player)
 	local has_list_priv = minetest.check_player_privs(player_name, { keyring_inspect=true })
 	local shared = item_meta:get_string(keyring.fields.shared)
 	local is_shared_with = keyring.fields.utils.shared.is_shared_with(player_name, shared)
+	local key_management_allowed = (keyring.fields.utils.owner.is_key_management_allowed(
+		keyring_owner, shared, item_meta:get_int(keyring.fields.shared_key_management)) == 1)
 	local has_keys = next(minetest.deserialize(
 		item_meta:get_string(keyring.fields.KRS)) or {}) or false
 
@@ -158,8 +161,8 @@ local function get_formspec_properties(itemstack, player)
 		props.display_keys_list = true
 		props.msg_list_keys = FA.msg_list_of_keys or S("List of keys in the keyring")
 		props.key_virtual_symbol = FA.virtual_symbol or S("[virtual]")
-		props.display_rename_button = FA.rename_key or false
-		props.display_remove_button = FA.remove_key or false
+		props.display_rename_button = FA.rename_key and key_management_allowed or false
+		props.display_remove_button = FA.remove_key and key_management_allowed or false
 	else
 		props.display_keys_list = false
 		props.msg_list_keys = FA.msg_no_key or S("There is no key in the keyring.")
@@ -225,6 +228,8 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	local keyring_owner = meta:get_string("owner")
 	local shared = meta:get_string(keyring.fields.shared)
 	local keyring_allowed = keyring.fields.utils.owner.is_edit_allowed(keyring_owner, name)
+	local key_management_allowed = (keyring.fields.utils.owner.is_key_management_allowed(
+		keyring_owner, shared, meta:get_int(keyring.fields.shared_key_management)) == 1)
 	if not keyring_allowed then
 		if (not minetest.check_player_privs(name, { keyring_inspect=true })) and
 			not keyring.fields.utils.shared.is_shared_with(name, shared) then
@@ -349,7 +354,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			and fields.key_enter_field == "new_name"))
 			and key_list[name] and selected[name] and selected[name] <= #key_list[name]
 			and fields.new_name and fields.new_name ~= "" and selected[name]
-			and FA.rename_key then
+			and FA.rename_key and key_management_allowed then
 			local u_krs = minetest.deserialize(krs)
 			u_krs[key_list[name][selected[name]]].user_description = fields.new_name
 			meta:set_string(keyring.fields.KRS, minetest.serialize(u_krs))
@@ -359,7 +364,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		end
 		-- put the key out of keyring
 		if fields.remove and selected[name] and key_list[name] and selected[name]
-			and selected[name] <= #key_list[name] and FA.remove_key then
+			and selected[name] <= #key_list[name] and FA.remove_key and key_management_allowed then
 			local key = ItemStack("default:key")
 			local u_krs = minetest.deserialize(krs)
 			local key_meta = key:get_meta()
