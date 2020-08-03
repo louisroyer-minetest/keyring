@@ -1,8 +1,8 @@
 -- Look for required things in
 package.path = "../?.lua;" .. package.path
-_G.keyring = {settings = {}}
--- Run meta_fields.lua file
-require("meta_fields")
+_G.keyring = {settings = {}, fields = {utils = {}}}
+-- Run meta_fields_utils_shared.lua file
+require("meta_fields_utils_shared")
 
 -- Tests
 describe("shared.is_shared_with", function()

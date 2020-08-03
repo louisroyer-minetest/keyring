@@ -30,6 +30,8 @@ Personal Keyring=
 
 ### formspec.lua ###
 
+Allow key management=
+Deny key management=
 Exit=
 Keyring settings=
 Keys management=
@@ -41,6 +43,8 @@ Rename key=
 Share=
 There is no key in the keyring.=
 There is no room in your inventory for a key.=
+They are able to use the keyring and to manage keys.=
+They are able to use the keyring but not to manage keys.=
 This keyring is not shared.=
 This keyring is owned by @1.=
 This keyring is public.=

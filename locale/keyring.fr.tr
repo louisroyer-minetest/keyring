@@ -30,6 +30,8 @@ Personal Keyring=Trousseau personnel
 
 ### formspec.lua ###
 
+Allow key management=Autoriser la gestion des clés
+Deny key management=Interdire la gestion des clés
 Exit=Quitter
 Keyring settings=Paramètres du trousseau
 Keys management=Gestion des clés
@@ -41,6 +43,8 @@ Rename key=Renommer la clé
 Share=Partager
 There is no key in the keyring.=Il n’y a pas de clé dans ce trousseau.
 There is no room in your inventory for a key.=Il n’y a pas de place dans votre inventaire pour une clé.
+They are able to use the keyring and to manage keys.=Ils peuvent utiliser le trousseau et gérer les clés.
+They are able to use the keyring but not to manage keys.=Ils peuvent utiliser le trousseau mais pas gérer les clés.
 This keyring is not shared.=Ce trousseau n’est pas partagé.
 This keyring is owned by @1.=Ce trousseau appartient à @1.
 This keyring is public.=Ce trousseau est public.
