@@ -55,7 +55,7 @@ end
 
 
 -- copy `on_place` from `default:key`
-local key_on_place = ItemStack("default:key"):get_definition().on_place
+local key_on_place = minetest.registered_items["default:key"].on_place
 
 keyring.craft_common.keyring_on_place = function(itemstack, placer, pointed_thing)
 	-- we try to select a key before using it
@@ -300,7 +300,7 @@ minetest.register_on_craft(function(itemstack, player, old_craft_grid, craft_inv
 	end
 	-- write owner
 	meta:set_string("description",
-		ItemStack("keyring:personal_keyring"):get_description()
+		minetest.registered_items["keyring:personal_keyring"].description
 		.." ("..S("owned by @1", keyring_properties.owner)..")")
 	meta:set_string("owner", keyring_properties.owner)
 	return itemstack

@@ -277,12 +277,12 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 			if fields.make_private  then
 				meta:set_string("owner", name)
 				meta:set_string("description",
-					ItemStack(item_name):get_description()
+					minetest.registered_items[item_name].description
 					.." ("..S("owned by @1", name)..")")
 			elseif fields.make_public then
 				meta:set_string("owner", "")
 				meta:set_string("description",
-					ItemStack(item_name):get_description())
+					minetest.registered_items[item_name].description)
 			end
 			player:set_wielded_item(item)
 			keyring.form.formspec(item, minetest.get_player_by_name(name))
