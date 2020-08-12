@@ -1,4 +1,6 @@
-# Keyring [![Build Status](https://travis-ci.org/louisroyer/minetest-keyring.svg?branch=master)](https://travis-ci.org/louisroyer/minetest-keyring)
+# Keyring
+
+[![Build Status](https://travis-ci.org/louisroyer/minetest-keyring.svg?branch=master)](https://travis-ci.org/louisroyer/minetest-keyring) [![ContentDB](https://content.minetest.net/packages/louisroyer/keyring/shields/title/)](https://content.minetest.net/packages/louisroyer/keyring/) [![ContentDB](https://content.minetest.net/packages/louisroyer/keyring/shields/downloads/)](https://content.minetest.net/packages/louisroyer/keyring/)
 
 This minetest mod adds keyrings.
 Keyrings can be used to store keys.
