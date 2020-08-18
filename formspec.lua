@@ -485,39 +485,62 @@ local function get_player_shared_list(player_list, name)
 	return player_list:gsub("%s+", ",")
 end
 
---[[ Get connected players list + player’s faction (not already in shared)
--- parameter: list of players separated by space, player name
+--[[
+-- Add name to list separated by separator.
+-- parameters:
+-- - list: the previous list
+-- - name: the name to add
+-- - first: true if this is the first name to add to the list
+-- - separator: separator to use
+--
+-- returns:
+-- - the new list
 --]]
-local function get_player_list_connected(player_list, name)
+local function add_to_list(list, name, first, separator)
+	if not first then
+		list = list..separator
+	end
+	list = list..name
+	return list
+end
+
+--[[
+-- Get connected players list + player’s faction (not already in shared)
+-- parameter:
+-- - shared_list: list of players/factions shared with (space separated)
+-- - name: player name
+--]]
+local function get_player_list_connected(shared_list, name)
 	local list = minetest.get_connected_players()
 	local res_list = ""
 	local first = true
 	for _, v in pairs(list) do
 		local v_name = v:get_player_name()
 		if (v_name ~= name) and
-			not keyring.fields.utils.shared.is_shared_with_raw(v_name, player_list) then
-			if not first then
-				res_list = res_list..","
-			else
-				first = false
-			end
-			res_list = res_list..v_name
+			not keyring.fields.utils.shared.is_shared_with_raw(v_name, shared_list) then
+			res_list = add_to_list(res_list, v_name, first, ",")
+			first = false
 		end
 	end
 	if not keyring.settings.playerfactions then
 		return res_list
 	end
-	local p_fac = factions.get_player_faction(name)
-	if (p_fac == nil) then
-		return res_list
+
+	-- playerfactions support
+	local p_factions = {}
+	if factions.version == nil then
+		-- backward compatibility
+		table.insert(p_factions, factions.get_player_faction(name))
+	else
+		p_factions = factions.get_player_factions(name)
 	end
-	if keyring.fields.utils.shared.is_shared_with_raw("faction:"..p_fac, player_list) then
-		return res_list
+	for _, p_fac in ipairs(p_factions) do
+		if not keyring.fields.utils.shared.is_shared_with_raw("faction:"..p_fac,
+			shared_list) then
+			res_list = add_to_list(res_list, "faction:"..p_fac, first, ",")
+			first = false
+		end
 	end
-	if not first then
-		res_list = res_list..","
-	end
-	res_list = res_list.."faction:"..p_fac
 	return res_list
 end
 
