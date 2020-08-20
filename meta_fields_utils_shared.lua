@@ -16,13 +16,28 @@ end
 -- either directly or via factions
 --]]
 keyring.fields.utils.shared.is_shared_with = function(playername, list)
+	-- Check if shared with the player
+	if keyring.fields.utils.shared.is_shared_with_raw(playername, list) then
+		return true
+	end
+	-- Additional checks for factions
 	if keyring.settings.playerfactions then
-		local p_fac = factions.get_player_faction(playername)
-		if (p_fac ~= nil) and (" "..list.." "):find(" faction:"..p_fac.." ", 1, true) then
-			return true
+		if factions.version == nil then
+			-- backward compatibility
+			local p_fac = factions.get_player_faction(playername)
+			if p_fac and (" "..list.." "):find(" faction:"..p_fac.." ", 1, true) then
+				return true
+			end
+		else
+			for match in (" "..list.." "):gmatch(
+				"faction:([^ ]+)%f[ ]") do
+				if factions.player_is_in_faction(match, playername) then
+					return true
+				end
+			end
 		end
 	end
-	return (" "..list.." "):find(" "..playername.." ", 1, true) and true or false
+	return false
 end
 
 --[[
