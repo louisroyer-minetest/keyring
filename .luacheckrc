@@ -24,3 +24,16 @@ read_globals = {
 	"basic_materials",
 	"factions",
 }
+
+files["override_default_can_interact_with_node.lua"] = {
+	read_globals = {
+		default = {
+			fields = {
+				can_interact_with_node = {
+					read_only = false,
+					other_fields = false,
+				}
+			}
+		}
+	}
+}

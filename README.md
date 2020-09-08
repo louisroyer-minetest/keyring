@@ -61,6 +61,7 @@ Notes:
 ## Settings
 - Setting `keyring.personal_keyring` is available to disable/enable personal keyring (enabled by default).
 - Setting `keyring.playerfactions` is available to disable/enable the possiblity to share personal keyrings with factions (enabled by default).
+- Setting `keyring.override_default_can_interact_with_node` allow to automatically select key in the keyring when the interaction check is done with `default.can_interact_with_node`. This allow better integration with mods like `technic_chests`, where chests interaction is not checked on openning but when moving items.
 
 ## Privileges
 You can grant the privilege `keyring_inspect` to allow a player to list keys of personal keyrings owned by other players.
