@@ -3,13 +3,15 @@ local MP = minetest.get_modpath("keyring")
 keyring = {}
 
 -- mod information
-keyring.mod = {version = "1.2.4", author = "Louis Royer"}
+keyring.mod = {version = "1.2.5", author = "Louis Royer"}
 
 -- keyring settings
 keyring.settings =
 	{
 		personal_keyring = minetest.settings:get_bool("keyring.personal_keyring", true),
 		playerfactions = minetest.settings:get_bool("keyring.playerfactions", true),
+		override_default_can_interact_with_node = minetest.settings:get_bool(
+			"keyring.override_default_can_interact_with_node", true),
 	}
 
 -- disable playerfactions if not loaded
@@ -37,6 +39,9 @@ if not basic_materials.mod then
 	.."/-/archive/master/basic_materials-master.zip")
 end
 
+if keyring.settings.override_default_can_interact_with_node then
+	dofile(MP.."/override_default_can_interact_with_node.lua")
+end
 dofile(MP.."/privileges.lua")
 dofile(MP.."/meta_fields.lua")
 dofile(MP.."/formspec.lua")
