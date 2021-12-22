@@ -50,7 +50,8 @@ Notes:
 - default
 
 ## Supported
-- [playerfactions](https://github.com/mt-mods/playerfactions): you can share a personal keyring with factions using syntax `faction:<faction_name>`.
+- [playerfactions](https://leagueh.xyz/git/playerfactions): you can share a personal keyring with factions using syntax `faction:<faction_name>`.
+    - [playerfactions's fork](https://github.com/mt-mods/playerfactions) 
 
 ## Suggested
 - [virtual_key](https://github.com/louisroyer/minetest-virtual-key): you can create virtual keys using a registerer and import them into your keyring; virtual keys is a good way to share access with friends without having to craft a lot of keys or to share a keyring.
