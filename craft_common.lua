@@ -54,8 +54,8 @@ keyring.craft_common.select_key = function(itemstack, placer, meta)
 end
 
 
--- copy `on_place` from `default:key`
-local key_on_place = minetest.registered_items["default:key"].on_place
+-- copy `on_place` from `keys:key`
+local key_on_place = minetest.registered_items["keys:key"].on_place
 
 keyring.craft_common.keyring_on_place = function(itemstack, placer, pointed_thing)
 	-- we try to select a key before using it

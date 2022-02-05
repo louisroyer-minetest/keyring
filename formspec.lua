@@ -401,7 +401,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 		-- put the key out of keyring
 		if fields.remove and selected[name] and key_list[name] and selected[name]
 			and selected[name] <= #key_list[name] and FA.remove_key and key_management_allowed then
-			local key = ItemStack("default:key")
+			local key = ItemStack("keys:key")
 			local u_krs = minetest.deserialize(krs)
 			local key_meta = key:get_meta()
 			key_meta:set_string("secret", selected[name])

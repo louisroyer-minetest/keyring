@@ -3,7 +3,7 @@ local MP = minetest.get_modpath("keyring")
 keyring = {}
 
 -- mod information
-keyring.mod = {version = "1.2.5", author = "Louis Royer"}
+keyring.mod = {version = "1.3.0", author = "Louis Royer"}
 
 -- keyring settings
 keyring.settings =
@@ -14,9 +14,14 @@ keyring.settings =
 			"keyring.override_default_can_interact_with_node", true),
 	}
 
--- disable playerfactions if not loaded
+-- disable playerfactions if playerfactions mod is not loaded
 if not minetest.get_modpath("playerfactions") then
 	keyring.settings.playerfactions = false
+end
+
+-- disable override_default_can_interact_with_node if default mod is not loaded
+if not minetest.get_modpath("default") then
+	keyring.override_default_can_interact_with_node = false
 end
 
 -- XXX: when https://github.com/minetest/minetest/pull/7377
@@ -31,7 +36,7 @@ keyring.log = function(level, text)
 end
 
 if not basic_materials.mod then
-	-- If this variable is unset, then basic_materials does not provide `wire` group
+	-- If this variable is not set, then basic_materials does not provide `wire` group
 	keyring.log("error", "Please use a more recent version of"
 	.." basic_materials to be able to craft keyrings.")
 	keyring.log("error", "Get latest version of basic_materials: "

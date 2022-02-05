@@ -33,7 +33,7 @@ In both crafts, keys (or `group:key`) items will be added to the resulting keyri
 - `basic_materials:padlock`
 
 ### Add a key to the keyring (shapeless)
-- `group:key` (`default:key` or `keyring:keyring`/`keyring:personal_keyring`)
+- `group:key` (`keys:key` or `keyring:keyring`/`keyring:personal_keyring`)
 - `keyring:keyring`/`keyring:personal_keyring`
 
 or
@@ -47,17 +47,18 @@ Notes:
 
 ## Dependencies
 - [basic_materials](https://gitlab.com/VanessaE/basic_materials)
-- default
+- keys (from MTG)
 
 ## Supported
+- default (from MTG): you can automatically select key in the keyring when the interaction check is done with `default.can_interact_with_node`.
 - [playerfactions](https://leagueh.xyz/git/playerfactions): you can share a personal keyring with factions using syntax `faction:<faction_name>`.
-    - [playerfactions's fork](https://github.com/mt-mods/playerfactions) 
+    - [playerfactions's fork](https://github.com/mt-mods/playerfactions)
 
 ## Suggested
 - [virtual_key](https://github.com/louisroyer/minetest-virtual-key): you can create virtual keys using a registerer and import them into your keyring; virtual keys is a good way to share access with friends without having to craft a lot of keys or to share a keyring.
 
 ## License
-- CC0-1.0, Louis Royer 2020
+- CC0-1.0, Louis Royer 2020-2022
 
 ## Settings
 - Setting `keyring.personal_keyring` is available to disable/enable personal keyring (enabled by default).
