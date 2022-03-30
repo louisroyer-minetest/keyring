@@ -200,7 +200,7 @@ end
 
 minetest.register_on_player_receive_fields(function(player, formname, fields)
 	-- guard
-	if not (formname == "keyring:edit") then
+	if formname ~= "keyring:edit" then
 		return
 	end
 	local name = player:get_player_name()
@@ -223,7 +223,7 @@ minetest.register_on_player_receive_fields(function(player, formname, fields)
 	end
 
 	-- check item group
-	if not (minetest.get_item_group(item_name, "key_container") == 1) then
+	if minetest.get_item_group(item_name, "key_container") ~= 1 then
 		keyring.log("action", "Player "..name..
 			" sent a keyring action but the selected item ("
 			..item_name..") is not a key container.")
