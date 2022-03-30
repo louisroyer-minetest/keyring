@@ -46,7 +46,7 @@ Notes:
 - when merging two keyrings, an empty keyring will be returned back
 
 ## Dependencies
-- [basic_materials](https://gitlab.com/VanessaE/basic_materials)
+- [basic_materials](https://github.com/mt-mods/basic_materials)
 - keys (from MTG)
 
 ## Supported
