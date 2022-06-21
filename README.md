@@ -1,6 +1,6 @@
 # Keyring
 
-[![Build Status](https://travis-ci.org/louisroyer/minetest-keyring.svg?branch=master)](https://travis-ci.org/louisroyer/minetest-keyring) [![ContentDB](https://content.minetest.net/packages/louisroyer/keyring/shields/title/)](https://content.minetest.net/packages/louisroyer/keyring/) [![ContentDB](https://content.minetest.net/packages/louisroyer/keyring/shields/downloads/)](https://content.minetest.net/packages/louisroyer/keyring/)
+![Build Status](https://github.com/louisroyer-minetest/keyring/actions/workflows/main.yml/badge.svg) [![ContentDB](https://content.minetest.net/packages/louisroyer/keyring/shields/title/)](https://content.minetest.net/packages/louisroyer/keyring/) [![ContentDB](https://content.minetest.net/packages/louisroyer/keyring/shields/downloads/)](https://content.minetest.net/packages/louisroyer/keyring/)
 
 This minetest mod adds keyrings.
 Keyrings can be used to store keys.
@@ -55,7 +55,7 @@ Notes:
     - [playerfactions's fork](https://github.com/mt-mods/playerfactions)
 
 ## Suggested
-- [virtual_key](https://github.com/louisroyer/minetest-virtual-key): you can create virtual keys using a registerer and import them into your keyring; virtual keys is a good way to share access with friends without having to craft a lot of keys or to share a keyring.
+- [virtual_key](https://github.com/louisroyer-minetest/virtual-key): you can create virtual keys using a registerer and import them into your keyring; virtual keys is a good way to share access with friends without having to craft a lot of keys or to share a keyring.
 
 ## License
 - CC0-1.0, Louis Royer 2020-2022
