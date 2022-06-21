@@ -25,6 +25,10 @@ read_globals = {
 	"factions",
 }
 
+globals = {
+	"keyring",
+}
+
 files["override_default_can_interact_with_node.lua"] = {
 	read_globals = {
 		default = {

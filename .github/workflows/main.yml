@@ -13,13 +13,6 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 jobs:
-    luacheck:
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-        - name: Luacheck linter
-          uses: lunarmodules/luacheck@v0
     busted:
       runs-on: ubuntu-latest
       steps:
