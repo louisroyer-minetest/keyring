@@ -7,16 +7,22 @@ keyring.craft_common = {}
 --[[ itemstack: the keyring:keyring used
 -- placer: the player using the keyring
 -- meta: meta of the pointed node
+-- entity: if meta is nil, a pointed lua entity
 --]]
-keyring.craft_common.select_key = function(itemstack, placer, meta)
+keyring.craft_common.select_key = function(itemstack, placer, meta, entity)
+	if (meta == nil) and (entity == nil) then
+		keyring.log("warning", "keyring.craft_comman.select_key called with wrong parameters.")
+		return itemstack
+	end
+
 	local i_meta = itemstack:get_meta()
 	local name = placer:get_player_name()
 	local keyring_owner = i_meta:get_string("owner")
 	local keyring_access = keyring.fields.utils.owner.is_edit_allowed(keyring_owner, name) or
 		keyring.fields.utils.shared.is_shared_with(name,
 		i_meta:get_string(keyring.fields.shared))
-	local owner = meta:get_string("owner")
-	local secret = meta:get_string("key_lock_secret")
+	local owner = meta and meta:get_string("owner") or entity.owner
+	local secret = meta and meta:get_string("key_lock_secret") or entity.key_lock_secret
 	if (secret == i_meta:get_string("secret") and keyring_access)
 		or owner == name or owner == "" then
 		-- nothing to do, abort to avoid spamming the chat
@@ -24,7 +30,7 @@ keyring.craft_common.select_key = function(itemstack, placer, meta)
 	end
 	if not keyring_access then
 		keyring.log("action", "Player "..name.." tryed to use personal keyring of "
-			..(keyring_owner or "unkwown player"))
+			..(keyring_owner or "unknown player"))
 		-- resetting immediatly the secret to avoid unallowed uses
 		i_meta:set_string("secret", "")
 		if placer:get_wielded_item():get_meta():get_string(

@@ -29,7 +29,23 @@ minetest.register_craftitem("keyring:keyring", {
 		return itemstack
 	end,
 	on_secondary_use = function(itemstack, placer, pointed_thing)
-		return keyring.form.formspec(itemstack, placer)
+		if pointed_thing.type == "object" then
+			local entity = pointed_thing.ref:get_luaentity()
+			if entity then
+				itemstack = keyring.craft_common.select_key(
+					itemstack, placer, nil, entity)
+				if (not placer:get_player_control().sneak) and entity.key_on_use then
+					entity:key_on_use(placer)
+				elseif entity.on_rightclick then
+					entity:on_rightclick(placer)
+				end
+			else
+				itemstack = keyring.form.formspec(itemstack, placer)
+			end
+		else
+			itemstack = keyring.form.formspec(itemstack, placer)
+		end
+		return itemstack
 	end,
 	-- mod doc
 	_doc_items_longdesc = S("A keyring to store your keys."),
