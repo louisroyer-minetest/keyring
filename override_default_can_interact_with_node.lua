@@ -12,10 +12,7 @@ if default.can_interact_with_node then
 			end
 
 			-- selecting key
-			local new_keyring = keyring.craft_common.select_key(item, player, meta)
-			if new_keyring ~= nil then
-				player:set_wielded_item(new_keyring)
-			end
+			keyring.craft_common.select_key(item, player, meta)
 
 			-- re-run the test
 			return original(player, pos, ...)
