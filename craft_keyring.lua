@@ -34,7 +34,12 @@ minetest.register_craftitem("keyring:keyring", {
 			if entity then
 				itemstack = keyring.craft_common.select_key(
 					itemstack, placer, nil, entity)
-				if (not placer:get_player_control().sneak) and entity.key_on_use then
+				if itemstack == nil then
+					-- avoid un-necessary calls
+					return
+				end
+				if (not placer:get_player_control().sneak) and entity.key_on_use and
+					entity.can_use_key and entity:can_use_key(placer) then
 					entity:key_on_use(placer)
 				elseif entity.on_rightclick then
 					entity:on_rightclick(placer)
