@@ -51,6 +51,7 @@ Notes:
 
 ## Supported
 - default (from MTG): you can automatically select key in the keyring when the interaction check is done with `default.can_interact_with_node`.
+- [entity_keys](https://gitlab.com/mazes_80/entity_keys)
 - [playerfactions](https://leagueh.xyz/git/playerfactions): you can share a personal keyring with factions using syntax `faction:<faction_name>`.
     - [playerfactions's fork](https://github.com/mt-mods/playerfactions)
 
@@ -58,7 +59,7 @@ Notes:
 - [virtual_key](https://github.com/louisroyer-minetest/virtual-key): you can create virtual keys using a registerer and import them into your keyring; virtual keys is a good way to share access with friends without having to craft a lot of keys or to share a keyring.
 
 ## License
-- CC0-1.0, Louis Royer 2020-2022
+- CC0-1.0, Louis Royer 2020-2023
 
 ## Settings
 - Setting `keyring.personal_keyring` is available to disable/enable personal keyring (enabled by default).
