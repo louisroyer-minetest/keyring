@@ -12,6 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: louisroyer-gh-actions/busted@v1.2.0
+      - uses: louisroyer-gh-actions/busted@v1.2.1
         with:
           args: .
