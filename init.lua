@@ -3,7 +3,7 @@ local MP = minetest.get_modpath("keyring")
 keyring = {}
 
 -- mod information
-keyring.mod = {version = "1.3.0", author = "Louis Royer"}
+keyring.mod = {version = "1.3.1", author = "Louis Royer"}
 
 -- keyring settings
 keyring.settings =
